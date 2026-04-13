@@ -24,8 +24,8 @@ description: >-
   </p>
 
   <div class="gxp-cta-row">
+    <a href="{{ '/documentation-map.html' | relative_url }}"><kbd>OPEN THE DOCS MAP</kbd></a>
     <a href="{{ '/user-guide.html' | relative_url }}"><kbd>OPEN THE USER GUIDE</kbd></a>
-    <a href="{{ '/getting-started.html' | relative_url }}"><kbd>DEPLOY THE PLUGIN</kbd></a>
     <a href="https://github.com/turbra/gitops-export-plugin"><kbd>VIEW REPOSITORY</kbd></a>
   </div>
 </div>
@@ -34,51 +34,12 @@ description: >-
 
 Use these pages in this order when you are orienting yourself:
 
+- <a href="{{ '/documentation-map.html' | relative_url }}"><kbd>DOCUMENTATION MAP</kbd></a>
+  for reading order and intent-based navigation across the docs set
 - <a href="{{ '/user-guide.html' | relative_url }}"><kbd>USER GUIDE</kbd></a>
   for the shortest install-to-export-to-Argo CD path
 - <a href="{{ '/getting-started.html' | relative_url }}"><kbd>GETTING STARTED</kbd></a>
-  for deployment details, image builds, and local development
-- <a href="{{ '/architecture-and-deployment.html' | relative_url }}"><kbd>ARCHITECTURE</kbd></a>
-  for the runtime model, browser-side execution, and install topology
-- <a href="{{ '/manifest-parsing-and-pruning.html' | relative_url }}"><kbd>PARSING AND PRUNING</kbd></a>
-  for the classification and sanitization behavior behind the export
-- <a href="{{ '/rbac-reference.html' | relative_url }}"><kbd>RBAC REFERENCE</kbd></a>
-  for installer privileges, runtime constraints, and end-user access expectations
-
-## What The Plugin Covers
-
-<div class="gxp-card-grid">
-  <div class="gxp-card">
-    <h3>Namespace Scan</h3>
-    <p>Lists selected namespaced resource kinds through the OpenShift console proxy using the current user's RBAC.</p>
-  </div>
-  <div class="gxp-card">
-    <h3>Sanitized YAML</h3>
-    <p>Removes server-assigned metadata, controller-owned state, and common runtime defaults before export.</p>
-  </div>
-  <div class="gxp-card">
-    <h3>ZIP Archive</h3>
-    <p>Writes exportable manifests into include, cleanup, and review directories with README and warning context.</p>
-  </div>
-  <div class="gxp-card">
-    <h3>Argo CD Application</h3>
-    <p>Generates a GitOps-ready Application definition from the latest sanitized export without creating cluster resources directly.</p>
-  </div>
-</div>
-
-## Product Shape
-
-The current operating model is intentionally narrow and explicit:
-
-| Area | Current model |
-|------|---------------|
-| Scope | Single namespace, browser-side scan |
-| Output | Sanitized YAML previews, ZIP archive, Argo CD `Application` YAML |
-| Auth model | OpenShift console session and namespace RBAC |
-| Runtime | Static plugin served by nginx, no backend API |
-| Install path | Kustomize overlay plus one-time console patcher Job |
-
-That shape is deliberate. The plugin is not trying to replace Argo CD or become a general Kubernetes export utility. It exists to help a user move from live namespace state to Git-managed manifests with as little ceremony as possible.
+  for deployment details, image builds, and re-apply behavior
 
 ## Screenshots
 
@@ -99,30 +60,17 @@ That shape is deliberate. The plugin is not trying to replace Argo CD or become 
   </a>
 </div>
 
-## Documentation Paths
+## Current Operating Model
 
-<div class="gxp-doc-list">
-  <div class="gxp-doc-item">
-    <strong><a href="{{ '/user-guide.html' | relative_url }}">User Guide</a></strong>
-    <p>Fastest path for a new user: install the plugin, export a namespace, understand the ZIP layout, and generate the Argo CD Application YAML.</p>
-  </div>
-  <div class="gxp-doc-item">
-    <strong><a href="{{ '/getting-started.html' | relative_url }}">Getting Started</a></strong>
-    <p>Operational reference for install, re-apply behavior, image builds, local development, and removal.</p>
-  </div>
-  <div class="gxp-doc-item">
-    <strong><a href="{{ '/architecture-and-deployment.html' | relative_url }}">Architecture and Deployment</a></strong>
-    <p>Runtime components, browser execution model, install patcher Job, and security boundaries.</p>
-  </div>
-  <div class="gxp-doc-item">
-    <strong><a href="{{ '/manifest-parsing-and-pruning.html' | relative_url }}">Manifest Parsing and Pruning</a></strong>
-    <p>Classifier behavior, sanitization rules, preview truncation, and export semantics for contributors and advanced users.</p>
-  </div>
-  <div class="gxp-doc-item">
-    <strong><a href="{{ '/rbac-reference.html' | relative_url }}">RBAC Reference</a></strong>
-    <p>Which identities need which permissions: installer, runtime, and the end user scanning a namespace.</p>
-  </div>
-</div>
+The current product shape is intentionally narrow:
+
+| Area | Current model |
+|------|---------------|
+| Scope | Single namespace, browser-side scan |
+| Output | Sanitized YAML previews, ZIP archive, Argo CD `Application` YAML |
+| Auth model | OpenShift console session and namespace RBAC |
+| Runtime | Static plugin served by nginx, no backend API |
+| Install path | Kustomize overlay plus one-time console patcher Job |
 
 ## Repository
 

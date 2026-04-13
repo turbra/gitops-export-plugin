@@ -26,6 +26,9 @@
             {% unless page.url == '/' or page.url == '/index.html' %}
             <a href="{{ '/' | relative_url }}"><kbd>DOCS HOME</kbd></a>
             {% endunless %}
+            {% unless page.url == '/documentation-map.html' %}
+            <a href="{{ '/documentation-map.html' | relative_url }}"><kbd>DOCS MAP</kbd></a>
+            {% endunless %}
             {% unless page.url == '/user-guide.html' %}
             <a href="{{ '/user-guide.html' | relative_url }}"><kbd>USER GUIDE</kbd></a>
             {% endunless %}
