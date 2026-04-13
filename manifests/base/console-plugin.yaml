@@ -1,0 +1,20 @@
+apiVersion: console.openshift.io/v1
+kind: ConsolePlugin
+metadata:
+  labels:
+    app: gitops-export-console
+    app.kubernetes.io/instance: gitops-export-console
+    app.kubernetes.io/name: gitops-export-console
+    app.kubernetes.io/part-of: gitops-export-console
+  name: gitops-export-console
+spec:
+  backend:
+    service:
+      basePath: /
+      name: gitops-export-console
+      namespace: gitops-export-console
+      port: 9443
+    type: Service
+  displayName: GitOps Export
+  i18n:
+    loadType: Preload

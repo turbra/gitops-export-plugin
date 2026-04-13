@@ -1,0 +1,13 @@
+namespace: gitops-export-console
+
+resources:
+  - namespace.yaml
+  - console-plugin.yaml
+  - configmap.yaml
+  - plugin-deploy.yaml
+  - plugin-svc.yaml
+
+images:
+  - name: gitops-export-console-image
+    newName: docker.io/barbicanboost/gitops-export-console
+    newTag: "c4664bc7"

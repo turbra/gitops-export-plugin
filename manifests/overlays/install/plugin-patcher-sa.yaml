@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: gitops-export-console
+    app.kubernetes.io/instance: gitops-export-console
+    app.kubernetes.io/name: gitops-export-console
+    app.kubernetes.io/part-of: gitops-export-console
+  name: gitops-export-console-patcher

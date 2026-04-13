@@ -1,0 +1,249 @@
+.gitops-export-console__grid {
+  gap: var(--pf-t--global--spacer--lg);
+}
+
+.gitops-export-console__flowHeader {
+  display: grid;
+  gap: var(--pf-t--global--spacer--sm);
+}
+
+.gitops-export-console__column {
+  display: grid;
+  gap: var(--pf-t--global--spacer--md);
+  align-content: start;
+}
+
+.gitops-export-console__stack {
+  display: grid;
+  gap: var(--pf-t--global--spacer--md);
+}
+
+.gitops-export-console__subtle {
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.gitops-export-console__introHeader {
+  align-items: flex-start;
+}
+
+.gitops-export-console__introSummary {
+  display: grid;
+  gap: var(--pf-t--global--spacer--xs);
+}
+
+.gitops-export-console__introLead {
+  margin: 0;
+}
+
+.gitops-export-console__introMeta {
+  display: grid;
+  gap: var(--pf-t--global--spacer--sm) var(--pf-t--global--spacer--lg);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.gitops-export-console__introMetaItem {
+  display: grid;
+  gap: var(--pf-t--global--spacer--xs);
+  align-content: start;
+}
+
+.gitops-export-console__controls {
+  display: grid;
+  gap: var(--pf-t--global--spacer--sm);
+}
+
+.gitops-export-console__field {
+  display: grid;
+  gap: var(--pf-t--global--spacer--xs);
+}
+
+.gitops-export-console__fieldWithAction {
+  display: grid;
+  gap: var(--pf-t--global--spacer--xs);
+}
+
+.gitops-export-console__input {
+  min-height: 2.5rem;
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+  padding: 0.5rem 0.625rem;
+  background: var(--pf-t--global--background--color--primary--default);
+  color: inherit;
+}
+
+.gitops-export-console__input--invalid {
+  border-color: var(--pf-t--global--border--color--status--danger--default);
+}
+
+.gitops-export-console__fieldError {
+  color: var(--pf-t--global--text--color--status--danger--default);
+  font-size: 0.875rem;
+}
+
+.gitops-export-console__fieldHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pf-t--global--spacer--sm);
+}
+
+.gitops-export-console__inlineActions {
+  display: inline-flex;
+  gap: var(--pf-t--global--spacer--sm);
+  flex-wrap: wrap;
+}
+
+.gitops-export-console__radioGroup,
+.gitops-export-console__checkboxStack,
+.gitops-export-console__definitionSections,
+.gitops-export-console__definitionReview {
+  display: grid;
+  gap: var(--pf-t--global--spacer--md);
+}
+
+.gitops-export-console__radioOption,
+.gitops-export-console__checkOption {
+  display: flex;
+  gap: var(--pf-t--global--spacer--sm);
+  align-items: flex-start;
+  padding: var(--pf-t--global--spacer--sm);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+  background: var(--pf-t--global--background--color--secondary--default);
+}
+
+.gitops-export-console__radioOption span,
+.gitops-export-console__checkOption span {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.gitops-export-console__sectionCard {
+  display: grid;
+  gap: var(--pf-t--global--spacer--md);
+  padding: var(--pf-t--global--spacer--lg);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--medium);
+  background: var(--pf-t--global--background--color--secondary--default);
+}
+
+.gitops-export-console__sectionHead {
+  display: grid;
+  gap: var(--pf-t--global--spacer--xs);
+}
+
+.gitops-export-console__sectionHead h3,
+.gitops-export-console__sectionHead p {
+  margin: 0;
+}
+
+.gitops-export-console__sectionBody,
+.gitops-export-console__definitionGrid {
+  display: grid;
+  gap: var(--pf-t--global--spacer--md);
+}
+
+.gitops-export-console__emptyReview {
+  min-height: 18rem;
+  display: grid;
+  place-items: center;
+  padding: var(--pf-t--global--spacer--lg);
+  border: 1px dashed var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+  background: var(--pf-t--global--background--color--secondary--default);
+}
+
+.gitops-export-console__checkboxGrid {
+  display: grid;
+  gap: var(--pf-t--global--spacer--xs);
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  padding: var(--pf-t--global--spacer--sm);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+}
+
+.gitops-export-console__select {
+  min-height: 2.25rem;
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+  padding: 0.375rem 0.5rem;
+  background: var(--pf-t--global--background--color--primary--default);
+  color: inherit;
+}
+
+.gitops-export-console__requestList {
+  display: grid;
+  gap: var(--pf-t--global--spacer--md);
+}
+
+.gitops-export-console__requestItem {
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--medium);
+  padding: var(--pf-t--global--spacer--md);
+  background: var(--pf-t--global--background--color--secondary--default);
+}
+
+.gitops-export-console__requestHead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--pf-t--global--spacer--md);
+  align-items: baseline;
+  margin-bottom: var(--pf-t--global--spacer--sm);
+}
+
+.gitops-export-console__inlineList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pf-t--global--spacer--sm);
+}
+
+.gitops-export-console__label {
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+}
+
+.gitops-export-console__details {
+  margin-top: var(--pf-t--global--spacer--sm);
+  overflow-x: auto;
+}
+
+.gitops-export-console__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.gitops-export-console__table th,
+.gitops-export-console__table td {
+  padding: 0.5rem;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.gitops-export-console__table thead th {
+  border-top: 0;
+  color: var(--pf-t--global--text--color--subtle);
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+}
+
+.gitops-export-console__nameCell {
+  min-width: 14rem;
+}
+
+.gitops-export-console__resourceVersion {
+  color: var(--pf-t--global--text--color--subtle);
+  font-family: var(--pf-t--global--font--family--mono);
+  font-size: 0.8rem;
+  margin-top: 0.125rem;
+  white-space: nowrap;
+}
+
+.gitops-export-console__preview {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 24rem;
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+  overflow: hidden;
+}

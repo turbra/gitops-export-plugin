@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: gitops-export-console
+    app.kubernetes.io/instance: gitops-export-console-job
+    app.kubernetes.io/name: gitops-export-console
+    app.kubernetes.io/part-of: gitops-export-console
+  name: gitops-export-console-install-patcher
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app: gitops-export-console
+        app.kubernetes.io/instance: gitops-export-console
+        app.kubernetes.io/name: gitops-export-console
+        app.kubernetes.io/part-of: gitops-export-console
+        job-name: gitops-export-console-install-patcher
+    spec:
+      containers:
+        - command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              existing_plugins="$(oc get consoles.operator.openshift.io cluster -o json | jq -c '.spec.plugins // []')"
+              merged_plugins="$(jq --argjson existingPlugins "${existing_plugins}" --argjson consolePlugin '["gitops-export-console"]' -c -n '$existingPlugins + $consolePlugin | unique')"
+              patch_payload="$(jq --argjson mergedPlugins "${merged_plugins}" -n -c '{ "spec": { "plugins": $mergedPlugins } }')"
+              oc patch consoles.operator.openshift.io cluster --patch "${patch_payload}" --type=merge
+          image: registry.redhat.io/openshift4/ose-tools-rhel9@sha256:ee65b244fc94d5765514c604dc0a288517dcdce68de65128d047622b6b30a618
+          imagePullPolicy: IfNotPresent
+          name: gitops-export-console-install-patcher
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccount: gitops-export-console-patcher
+      serviceAccountName: gitops-export-console-patcher
+      terminationGracePeriodSeconds: 400

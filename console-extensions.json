@@ -1,0 +1,28 @@
+[
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "group": "",
+        "version": "v1",
+        "kind": "Namespace"
+      },
+      "name": "%plugin__gitops-export-console~GitOps Export%",
+      "href": "gitops-export",
+      "component": { "$codeRef": "GitOpsExportPage" }
+    }
+  },
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "group": "project.openshift.io",
+        "version": "v1",
+        "kind": "Project"
+      },
+      "name": "%plugin__gitops-export-console~GitOps Export%",
+      "href": "gitops-export",
+      "component": { "$codeRef": "GitOpsExportPage" }
+    }
+  }
+]

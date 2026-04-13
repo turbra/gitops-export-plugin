@@ -1,0 +1,8 @@
+namespace: gitops-export-console
+
+resources:
+  - ../../base
+  - plugin-patcher-sa.yaml
+  - plugin-patcher-cluster-role.yaml
+  - plugin-patcher-cluster-rolebinding.yaml
+  - plugin-patcher-job.yaml

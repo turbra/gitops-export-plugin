@@ -1,0 +1,11 @@
+.git
+.github
+.devcontainer
+docs
+hack
+manifests
+plan.md
+plan_prompt.md
+dist
+node_modules
+npm-debug.log
