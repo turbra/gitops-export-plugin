@@ -155,7 +155,7 @@ Argo CD will now sync the exported manifests from Git to the destination namespa
 
 The plugin is a static JavaScript bundle served by an nginx pod in the `gitops-export-console` namespace. The console loads the bundle, but all scan logic -- listing resources, classifying them, sanitizing manifests, building ZIP archives -- runs in your browser. The nginx pod never makes Kubernetes API calls; it only serves files.
 
-For deeper technical detail, see [Architecture and Deployment](./architecture-and-deployment.md) and [Manifest Parsing and Pruning](./manifest-parsing-and-pruning.md).
+For deeper technical detail, see [Architecture and Deployment]({{ '/architecture-and-deployment.html' | relative_url }}) and [Manifest Parsing and Pruning]({{ '/manifest-parsing-and-pruning.html' | relative_url }}).
 
 ## Remove
 

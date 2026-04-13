@@ -1,0 +1,19 @@
+title: "GitOps Export"
+description: >-
+  OpenShift console plugin for exporting sanitized namespace manifests and
+  generating GitOps-ready Argo CD Application YAML.
+url: "https://turbra.github.io"
+baseurl: "/gitops-export-plugin"
+theme: jekyll-theme-primer
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+markdown: kramdown
+kramdown:
+  input: GFM
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default

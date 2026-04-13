@@ -14,7 +14,7 @@ This guide covers how to deploy the GitOps Export console plugin to an OpenShift
 
 - **OpenShift 4.20 or later** with the console operator enabled (the default)
 - **`oc` CLI** authenticated to the target cluster
-- **`cluster-admin`** role, or permissions to create a Namespace, Deployment, Service, ConfigMap, ConsolePlugin, Job, ServiceAccount, ClusterRole, and ClusterRoleBinding (the install overlay includes a Job that patches `consoles.operator.openshift.io/cluster` using its own dedicated ClusterRole -- the installer does not need that permission directly). See the [RBAC Reference](./rbac-reference.md) for details.
+- **`cluster-admin`** role, or permissions to create a Namespace, Deployment, Service, ConfigMap, ConsolePlugin, Job, ServiceAccount, ClusterRole, and ClusterRoleBinding (the install overlay includes a Job that patches `consoles.operator.openshift.io/cluster` using its own dedicated ClusterRole -- the installer does not need that permission directly). See the [RBAC Reference]({{ '/rbac-reference.html' | relative_url }}) for details.
 
 ### For building images
 

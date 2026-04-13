@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'en-US' }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% seo %}
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+    {% include head-custom.html %}
+  </head>
+  <body>
+    <a class="gxp-skip-link" href="#main-content">Skip to content</a>
+    <div class="gxp-site-shell">
+      <header class="gxp-site-header">
+        <div class="gxp-site-header-inner">
+          <p class="gxp-eyebrow">GitOps Export Project Pages</p>
+          <div class="gxp-site-brand">
+            <div>
+              <p class="gxp-site-brand-title">
+                <a href="{{ '/' | relative_url }}">GitOps Export</a>
+              </p>
+              <p class="gxp-site-brand-tagline">{{ site.description }}</p>
+            </div>
+          </div>
+          <div class="gxp-site-header-actions">
+            {% unless page.url == '/' or page.url == '/index.html' %}
+            <a href="{{ '/' | relative_url }}"><kbd>DOCS HOME</kbd></a>
+            {% endunless %}
+            {% unless page.url == '/user-guide.html' %}
+            <a href="{{ '/user-guide.html' | relative_url }}"><kbd>USER GUIDE</kbd></a>
+            {% endunless %}
+            {% unless page.url == '/getting-started.html' %}
+            <a href="{{ '/getting-started.html' | relative_url }}"><kbd>GET STARTED</kbd></a>
+            {% endunless %}
+            <a href="https://github.com/turbra/gitops-export-plugin"><kbd>REPOSITORY</kbd></a>
+          </div>
+        </div>
+      </header>
+
+      <main id="main-content" class="gxp-page-shell">
+        <div class="gxp-content-column">
+          <article class="markdown-body">
+            {{ content }}
+          </article>
+        </div>
+
+        <aside class="gxp-side-column">
+          <section class="gxp-page-toc" id="gxp-page-toc" hidden>
+            <h2 class="gxp-page-toc-title" id="gxp-on-this-page-title">On This Page</h2>
+            <ol
+              class="gxp-toc-list"
+              id="gxp-toc-list"
+              aria-labelledby="gxp-on-this-page-title"
+            ></ol>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="gxp-site-footer">
+        Generated from repository docs on {{ site.time | date: "%Y-%m-%d" }}.
+      </footer>
+    </div>
+  </body>
+</html>
