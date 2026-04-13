@@ -5,10 +5,8 @@ description: >-
 ---
 
 <div class="gxp-badge-row">
-  <a href="https://github.com/turbra/gitops-export-plugin/blob/main/LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/github/license/turbra/gitops-export-plugin" /></a>
-  <img alt="OpenShift console plugin" src="https://img.shields.io/badge/OpenShift-console%20plugin-EE0000" />
-  <img alt="Argo CD application YAML" src="https://img.shields.io/badge/Argo%20CD-Application%20YAML-005f60" />
-  <img alt="Namespace export flow" src="https://img.shields.io/badge/Workflow-cluster%20to%20GitOps-blue" />
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/License-Apache--2.0-2C7A7B?style=flat-square" /></a>
+  <img alt="OpenShift Console Plugin" src="https://img.shields.io/badge/OpenShift-console%20plugin-EE0000?style=flat-square" />
 </div>
 
 ## Start Here
