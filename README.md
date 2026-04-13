@@ -54,6 +54,17 @@ This creates the `gitops-export-console` namespace, deploys the plugin, and runs
 5. Expand the scan result to review classifications and YAML previews, download a ZIP archive of the sanitized manifests, or generate Argo CD Application YAML for Git.
    The ZIP includes `README.md`, optional `WARNINGS.md`, and manifests grouped into `manifests/include/`, `manifests/cleanup/`, and `manifests/review/`. The Application form pre-populates the in-cluster destination server, scanned namespace, `openshift-gitops` namespace, `default` project, and manual sync mode so you can adjust only the Git-specific inputs.
 
+### Screenshots
+
+<p>
+  <a href="./docs/gitops-export-result.png">
+    <img src="./docs/gitops-export-result.png" alt="GitOps Export scan results" width="48%" />
+  </a>
+  <a href="./docs/gitops-export-argocd.png">
+    <img src="./docs/gitops-export-argocd.png" alt="GitOps Export Argo CD application generator" width="48%" />
+  </a>
+</p>
+
 ### Remove
 
 ```sh
