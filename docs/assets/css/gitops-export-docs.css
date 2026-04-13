@@ -153,6 +153,12 @@ a:focus {
   align-items: center;
 }
 
+.gxp-badge-row img,
+.gxp-badge-row a {
+  display: block;
+  line-height: 0;
+}
+
 .gxp-site-header-actions {
   margin-top: 0.85rem;
 }
