@@ -11,25 +11,6 @@ description: >-
   <img alt="Namespace export flow" src="https://img.shields.io/badge/Workflow-cluster%20to%20GitOps-blue" />
 </div>
 
-<div class="gxp-hero">
-  <p class="gxp-inline-eyebrow">Cluster-First To GitOps</p>
-
-  <h1>GitOps Export</h1>
-
-  <p class="gxp-hero-lead">
-    GitOps Export is an OpenShift console plugin for teams that already built in-cluster
-    and now want a clean handoff into Git. It scans a namespace, classifies each live
-    resource, strips cluster-generated noise from the manifests, packages the export as a
-    ZIP archive, and generates Argo CD Application YAML from that same export context.
-  </p>
-
-  <div class="gxp-cta-row">
-    <a href="{{ '/documentation-map.html' | relative_url }}"><kbd>OPEN THE DOCS MAP</kbd></a>
-    <a href="{{ '/user-guide.html' | relative_url }}"><kbd>OPEN THE USER GUIDE</kbd></a>
-    <a href="https://github.com/turbra/gitops-export-plugin"><kbd>VIEW REPOSITORY</kbd></a>
-  </div>
-</div>
-
 ## Start Here
 
 Use these pages in this order when you are orienting yourself:
