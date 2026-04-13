@@ -41,6 +41,27 @@ Use these pages in this order when you are orienting yourself:
 - <a href="{{ '/getting-started.html' | relative_url }}"><kbd>GETTING STARTED</kbd></a>
   for deployment details, image builds, and re-apply behavior
 
+## What The Plugin Covers
+
+<div class="gxp-card-grid">
+  <div class="gxp-card">
+    <h3>Namespace Scan</h3>
+    <p>Lists selected namespaced resource kinds through the OpenShift console proxy using the current user's RBAC.</p>
+  </div>
+  <div class="gxp-card">
+    <h3>Sanitized YAML</h3>
+    <p>Removes server-assigned metadata, controller-owned state, and common runtime defaults before export.</p>
+  </div>
+  <div class="gxp-card">
+    <h3>ZIP Archive</h3>
+    <p>Writes exportable manifests into include, cleanup, and review directories with README and warning context.</p>
+  </div>
+  <div class="gxp-card">
+    <h3>Argo CD Application</h3>
+    <p>Generates a GitOps-ready Application definition from the latest sanitized export without creating cluster resources directly.</p>
+  </div>
+</div>
+
 ## Screenshots
 
 <div class="gxp-screenshot-grid">
@@ -71,6 +92,10 @@ The current product shape is intentionally narrow:
 | Auth model | OpenShift console session and namespace RBAC |
 | Runtime | Static plugin served by nginx, no backend API |
 | Install path | Kustomize overlay plus one-time console patcher Job |
+
+That shape is deliberate. The plugin is not trying to replace Argo CD or become
+a general Kubernetes export utility. It exists to help a user move from live
+namespace state to Git-managed manifests with as little ceremony as possible.
 
 ## Repository
 
