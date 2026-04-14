@@ -6,7 +6,6 @@ import {
   CardBody,
   CardHeader,
   CardTitle,
-  Content,
   DataList,
   DataListCell,
   DataListContent,
@@ -58,9 +57,9 @@ function ResourceDetailsList({
 
   if (!scan.status.resourceDetails.length) {
     return (
-      <Content component="p" className="gitops-export-console__subtle">
+      <p className="gitops-export-console__subtle">
         {t('No matching resources were found for the selected kinds.')}
-      </Content>
+      </p>
     );
   }
 
@@ -184,10 +183,10 @@ function ScanSummary({ scan }: { scan: NamespaceScan }) {
 function EmptyScanState({ title, body }: { title: string; body: string }) {
   return (
     <div className="gitops-export-console__emptyState">
-      <Content component="h2">{title}</Content>
-      <Content component="p" className="gitops-export-console__subtle">
+      <h2>{title}</h2>
+      <p className="gitops-export-console__subtle">
         {body}
-      </Content>
+      </p>
     </div>
   );
 }
@@ -287,13 +286,13 @@ export function LatestScanCard({
               <span>{scan.status.phase}</span>
             </div>
             <ScanSummary scan={scan} />
-            <Content component="p" className="gitops-export-console__subtle">
+            <p className="gitops-export-console__subtle">
               {scan.status.conditions?.[0]?.message ?? t('Namespace scan completed locally.')}
-            </Content>
-            <Content component="p" className="gitops-export-console__subtle">
+            </p>
+            <p className="gitops-export-console__subtle">
               {summarizeCounts(scan)}
-            </Content>
-            <Content component="p" className="gitops-export-console__subtle">
+            </p>
+            <p className="gitops-export-console__subtle">
               {exportableResourceCount > 0
                 ? warningCount > 0
                   ? t(
@@ -304,7 +303,7 @@ export function LatestScanCard({
                       count: exportableResourceCount,
                     })
                 : t('No exportable resources are available for this scan.')}
-            </Content>
+            </p>
             <div className="gitops-export-console__inlineActions">
               <Button
                 variant="secondary"
@@ -324,9 +323,9 @@ export function LatestScanCard({
               </Button>
             </div>
             {warningCount > 0 ? (
-              <Content component="p" className="gitops-export-console__subtle">
+              <p className="gitops-export-console__subtle">
                 {t('The archive adds a `WARNINGS.md` file for review, cleanup, or skipped resources.')}
-              </Content>
+              </p>
             ) : null}
             {downloadError ? (
               <Alert isInline variant="danger" title={t('ZIP export failed')}>

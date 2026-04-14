@@ -13,7 +13,6 @@ export function YamlPreview({ value }: YamlPreviewProps) {
         <CodeEditor
           value={value}
           language="yaml"
-          height="24rem"
           minHeight="18rem"
           showShortcuts={false}
           options={{

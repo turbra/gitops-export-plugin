@@ -3,7 +3,7 @@ import buildVersion from './version';
 
 const metadata: ConsolePluginBuildMetadata = {
   dependencies: {
-    '@console/pluginAPI': '^4.20.0',
+    '@console/pluginAPI': '^4.18.0',
   },
   name: 'gitops-export-console',
   displayName: 'GitOps Export',

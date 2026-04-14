@@ -12,7 +12,7 @@ Everything runs in your browser. The plugin never modifies resources in your nam
 
 ## Prerequisites
 
-- OpenShift 4.20 or later
+- OpenShift 4.18 or later
 - `oc` CLI logged in to the cluster
 - `cluster-admin` (or equivalent permissions to create the install resources)
 
