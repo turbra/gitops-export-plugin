@@ -10,4 +10,4 @@ resources:
 images:
   - name: gitops-export-console-image
     newName: docker.io/barbicanboost/gitops-export-console
-    newTag: "4e2bc1ff"
+    newTag: "5a05dfe9"
