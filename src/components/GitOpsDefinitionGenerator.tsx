@@ -124,20 +124,7 @@ export function GitOpsDefinitionGenerator({
     }
 
     try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(generated.yaml);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = generated.yaml;
-        textarea.setAttribute('readonly', 'true');
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        textarea.remove();
-      }
-
+      await navigator.clipboard.writeText(generated.yaml);
       setStatusSuccess(t('Application YAML copied to the clipboard.'));
       setStatusError('');
     } catch (error) {
