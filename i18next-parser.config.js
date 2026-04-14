@@ -1,0 +1,22 @@
+module.exports = {
+  contextSeparator: '_',
+  createOldCatalogs: false,
+  defaultNamespace: 'plugin__gitops-export-console',
+  defaultValue: (locale, namespace, key) => key,
+  indentation: 2,
+  keepRemoved: false,
+  keySeparator: false,
+  lexers: {
+    js: ['JsxLexer'],
+    jsx: ['JsxLexer'],
+    ts: ['JsxLexer'],
+    tsx: ['JsxLexer'],
+    default: ['JsxLexer'],
+  },
+  lineEnding: 'auto',
+  locales: ['en'],
+  namespaceSeparator: '~',
+  output: 'locales/$LOCALE/$NAMESPACE.json',
+  sort: true,
+  verbose: false,
+};

@@ -6,7 +6,10 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.shoresy.net/root/gitops-export.git"
+    "url": "https://github.com/turbra/gitops-export-plugin.git"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "scripts": {
     "check-types": "tsc --noEmit --skipLibCheck",
@@ -15,7 +18,7 @@
     "build-dev": "npm run clean && npm run webpack",
     "start": "webpack serve --progress",
     "start-console": "./start-console.sh",
-    "i18n": "echo 'No-op for now'",
+    "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" -c i18next-parser.config.js",
     "lint": "eslint src --fix",
     "lint:check": "eslint src",
     "webpack": "node -r ts-node/register ./node_modules/.bin/webpack"
@@ -23,8 +26,8 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
-    "@openshift-console/dynamic-plugin-sdk": "4.20-latest",
-    "@openshift-console/dynamic-plugin-sdk-webpack": "4.20-latest",
+    "@openshift-console/dynamic-plugin-sdk": "4.21-latest",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "4.21-latest",
     "@patternfly/react-core": "^6.2.2",
     "@patternfly/react-icons": "^6.2.2",
     "@types/node": "^22.0.0",
@@ -40,6 +43,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.4.0",
     "i18next": "^23.11.5",
+    "i18next-parser": "^9.0.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-i18next": "^11.7.3",

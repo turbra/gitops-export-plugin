@@ -62,19 +62,6 @@
   gap: var(--pf-t--global--spacer--xs);
 }
 
-.gitops-export-console__input {
-  min-height: 2.5rem;
-  border: 1px solid var(--pf-t--global--border--color--default);
-  border-radius: var(--pf-t--global--border--radius--small);
-  padding: 0.5rem 0.625rem;
-  background: var(--pf-t--global--background--color--primary--default);
-  color: inherit;
-}
-
-.gitops-export-console__input--invalid {
-  border-color: var(--pf-t--global--border--color--status--danger--default);
-}
-
 .gitops-export-console__fieldError {
   color: var(--pf-t--global--text--color--status--danger--default);
   font-size: 0.875rem;
@@ -99,23 +86,6 @@
 .gitops-export-console__definitionReview {
   display: grid;
   gap: var(--pf-t--global--spacer--md);
-}
-
-.gitops-export-console__radioOption,
-.gitops-export-console__checkOption {
-  display: flex;
-  gap: var(--pf-t--global--spacer--sm);
-  align-items: flex-start;
-  padding: var(--pf-t--global--spacer--sm);
-  border: 1px solid var(--pf-t--global--border--color--default);
-  border-radius: var(--pf-t--global--border--radius--small);
-  background: var(--pf-t--global--background--color--secondary--default);
-}
-
-.gitops-export-console__radioOption span,
-.gitops-export-console__checkOption span {
-  display: grid;
-  gap: 0.125rem;
 }
 
 .gitops-export-console__sectionCard {
@@ -143,16 +113,6 @@
   gap: var(--pf-t--global--spacer--md);
 }
 
-.gitops-export-console__emptyReview {
-  min-height: 18rem;
-  display: grid;
-  place-items: center;
-  padding: var(--pf-t--global--spacer--lg);
-  border: 1px dashed var(--pf-t--global--border--color--default);
-  border-radius: var(--pf-t--global--border--radius--small);
-  background: var(--pf-t--global--background--color--secondary--default);
-}
-
 .gitops-export-console__checkboxGrid {
   display: grid;
   gap: var(--pf-t--global--spacer--xs);
@@ -160,15 +120,6 @@
   padding: var(--pf-t--global--spacer--sm);
   border: 1px solid var(--pf-t--global--border--color--default);
   border-radius: var(--pf-t--global--border--radius--small);
-}
-
-.gitops-export-console__select {
-  min-height: 2.25rem;
-  border: 1px solid var(--pf-t--global--border--color--default);
-  border-radius: var(--pf-t--global--border--radius--small);
-  padding: 0.375rem 0.5rem;
-  background: var(--pf-t--global--background--color--primary--default);
-  color: inherit;
 }
 
 .gitops-export-console__requestList {
@@ -201,41 +152,43 @@
   font-weight: var(--pf-t--global--font--weight--body--bold);
 }
 
-.gitops-export-console__details {
-  margin-top: var(--pf-t--global--spacer--sm);
-  overflow-x: auto;
-}
-
-.gitops-export-console__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.gitops-export-console__table th,
-.gitops-export-console__table td {
-  padding: 0.5rem;
-  text-align: left;
-  vertical-align: top;
-  border-top: 1px solid var(--pf-t--global--border--color--default);
-}
-
-.gitops-export-console__table thead th {
-  border-top: 0;
-  color: var(--pf-t--global--text--color--subtle);
-  font-weight: var(--pf-t--global--font--weight--body--bold);
-}
-
-.gitops-export-console__nameCell {
-  min-width: 14rem;
-}
-
 .gitops-export-console__resourceVersion {
   color: var(--pf-t--global--text--color--subtle);
   font-family: var(--pf-t--global--font--family--mono);
   font-size: 0.8rem;
   margin-top: 0.125rem;
   white-space: nowrap;
+}
+
+.gitops-export-console__resourceList,
+.gitops-export-console__summaryList {
+  margin-top: var(--pf-t--global--spacer--sm);
+}
+
+.gitops-export-console__emptyState,
+.gitops-export-console__emptyReview {
+  display: grid;
+  gap: var(--pf-t--global--spacer--sm);
+  place-items: center;
+  padding: var(--pf-t--global--spacer--lg);
+  border-radius: var(--pf-t--global--border--radius--small);
+  background: var(--pf-t--global--background--color--secondary--default);
+  text-align: center;
+}
+
+.gitops-export-console__emptyState {
+  min-height: 10rem;
+}
+
+.gitops-export-console__emptyReview {
+  min-height: 18rem;
+  border: 1px dashed var(--pf-t--global--border--color--default);
+}
+
+.gitops-export-console__emptyState h2,
+.gitops-export-console__emptyReview h3,
+.gitops-export-console__emptyReview p {
+  margin: 0;
 }
 
 .gitops-export-console__preview {
