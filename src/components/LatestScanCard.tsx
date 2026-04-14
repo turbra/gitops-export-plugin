@@ -7,8 +7,19 @@ import {
   CardHeader,
   CardTitle,
   Content,
+  DataList,
+  DataListCell,
+  DataListContent,
+  DataListItem,
+  DataListItemCells,
+  DataListItemRow,
+  DescriptionList,
+  DescriptionListDescription,
+  DescriptionListGroup,
+  DescriptionListTerm,
   Spinner,
 } from '@patternfly/react-core';
+import { useTranslation } from 'react-i18next';
 import {
   countExportableResources,
   countWarningResources,
@@ -32,108 +43,152 @@ type LatestScanCardProps = {
   onExpandedPreviewChange: (value: string) => void;
 };
 
-type ResourceDetailsTableProps = {
+type ResourceDetailsListProps = {
   scan: NamespaceScan;
   expandedPreview: string;
   onExpandedPreviewChange: (value: string) => void;
 };
 
-function ResourceDetailsTable({
+function ResourceDetailsList({
   scan,
   expandedPreview,
   onExpandedPreviewChange,
-}: ResourceDetailsTableProps) {
+}: ResourceDetailsListProps) {
+  const { t } = useTranslation('plugin__gitops-export-console');
+
   if (!scan.status.resourceDetails.length) {
     return (
       <Content component="p" className="gitops-export-console__subtle">
-        No matching resources were found for the selected kinds.
+        {t('No matching resources were found for the selected kinds.')}
       </Content>
     );
   }
 
   return (
-    <div className="gitops-export-console__details">
-      <table className="gitops-export-console__table">
-        <thead>
-          <tr>
-            <th>Kind</th>
-            <th>Name</th>
-            <th>Classification</th>
-            <th>Reason</th>
-            <th>Preview</th>
-          </tr>
-        </thead>
-        <tbody>
-          {scan.status.resourceDetails.flatMap((resource) => {
-            const currentResourceKey = resourceKey(scan, resource);
-            const previewExpanded =
-              expandedPreview === currentResourceKey && Boolean(resource.preview);
+    <DataList aria-label={t('Scanned resource details')} className="gitops-export-console__resourceList">
+      {scan.status.resourceDetails.map((resource) => {
+        const currentResourceKey = resourceKey(scan, resource);
+        const previewExpanded =
+          expandedPreview === currentResourceKey && Boolean(resource.preview);
 
-            return [
-              <ResourceDetailsRow
-                key={currentResourceKey}
-                scan={scan}
-                resource={resource}
-                previewExpanded={previewExpanded}
-                onExpandedPreviewChange={onExpandedPreviewChange}
-              />,
-              ...(previewExpanded
-                ? [
-                    <tr key={`${currentResourceKey}/preview`}>
-                      <td colSpan={5}>
-                        <YamlPreview value={resource.preview ?? ''} />
-                      </td>
-                    </tr>,
-                  ]
-                : []),
-            ];
-          })}
-        </tbody>
-      </table>
-    </div>
+        return (
+          <ResourceDetailsItem
+            key={currentResourceKey}
+            scan={scan}
+            resource={resource}
+            previewExpanded={previewExpanded}
+            onExpandedPreviewChange={onExpandedPreviewChange}
+          />
+        );
+      })}
+    </DataList>
   );
 }
 
-type ResourceDetailsRowProps = {
+type ResourceDetailsItemProps = {
   scan: NamespaceScan;
   resource: ResourceClassification;
   previewExpanded: boolean;
   onExpandedPreviewChange: (value: string) => void;
 };
 
-function ResourceDetailsRow({
+function ResourceDetailsItem({
   scan,
   resource,
   previewExpanded,
   onExpandedPreviewChange,
-}: ResourceDetailsRowProps) {
+}: ResourceDetailsItemProps) {
+  const { t } = useTranslation('plugin__gitops-export-console');
   const currentResourceKey = resourceKey(scan, resource);
+  const previewId = `${currentResourceKey}/preview`;
 
   return (
-    <tr>
-      <td>{resource.kind}</td>
-      <td className="gitops-export-console__nameCell">
-        <div>{resource.name}</div>
-        <div className="gitops-export-console__resourceVersion">{resource.apiVersion}</div>
-      </td>
-      <td>{resource.classification}</td>
-      <td>{resource.reason}</td>
-      <td>
-        {resource.preview ? (
-          <Button
-            variant="link"
-            isInline
-            onClick={() =>
-              onExpandedPreviewChange(previewExpanded ? '' : currentResourceKey)
-            }
-          >
-            {previewExpanded ? 'Hide YAML' : 'Show YAML'}
-          </Button>
-        ) : (
-          <span className="gitops-export-console__subtle">n/a</span>
-        )}
-      </td>
-    </tr>
+    <DataListItem id={currentResourceKey} isExpanded={previewExpanded}>
+      <DataListItemRow>
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell key={`${currentResourceKey}-kind`} width={1}>
+              <span className="gitops-export-console__label">{resource.kind}</span>
+            </DataListCell>,
+            <DataListCell key={`${currentResourceKey}-name`} width={2}>
+              <div>{resource.name}</div>
+              <div className="gitops-export-console__resourceVersion">{resource.apiVersion}</div>
+            </DataListCell>,
+            <DataListCell key={`${currentResourceKey}-classification`} width={1}>
+              {resource.classification}
+            </DataListCell>,
+            <DataListCell key={`${currentResourceKey}-reason`} width={3}>
+              {resource.reason}
+            </DataListCell>,
+            <DataListCell key={`${currentResourceKey}-preview`} width={1} alignRight>
+              {resource.preview ? (
+                <Button
+                  variant="link"
+                  isInline
+                  onClick={() =>
+                    onExpandedPreviewChange(previewExpanded ? '' : currentResourceKey)
+                  }
+                  aria-controls={previewId}
+                  aria-expanded={previewExpanded}
+                >
+                  {previewExpanded ? t('Hide YAML') : t('Show YAML')}
+                </Button>
+              ) : (
+                <span className="gitops-export-console__subtle">{t('n/a')}</span>
+              )}
+            </DataListCell>,
+          ]}
+        />
+      </DataListItemRow>
+      {resource.preview ? (
+        <DataListContent
+          id={previewId}
+          aria-label={t('YAML preview for {{kind}} {{name}}', {
+            kind: resource.kind,
+            name: resource.name,
+          })}
+          isHidden={!previewExpanded}
+          hasNoPadding
+        >
+          <YamlPreview value={resource.preview ?? ''} />
+        </DataListContent>
+      ) : null}
+    </DataListItem>
+  );
+}
+
+function ScanSummary({ scan }: { scan: NamespaceScan }) {
+  const { t } = useTranslation('plugin__gitops-export-console');
+
+  return (
+    <DescriptionList
+      columnModifier={{ default: '2Col', md: '3Col' }}
+      className="gitops-export-console__summaryList"
+    >
+      <DescriptionListGroup>
+        <DescriptionListTerm>{t('Target')}</DescriptionListTerm>
+        <DescriptionListDescription>{scan.spec.namespace}</DescriptionListDescription>
+      </DescriptionListGroup>
+      <DescriptionListGroup>
+        <DescriptionListTerm>{t('Kinds')}</DescriptionListTerm>
+        <DescriptionListDescription>{scan.spec.includeResourceTypes?.length ?? 0}</DescriptionListDescription>
+      </DescriptionListGroup>
+      <DescriptionListGroup>
+        <DescriptionListTerm>{t('Secrets')}</DescriptionListTerm>
+        <DescriptionListDescription>{scan.spec.secretHandling || 'redact'}</DescriptionListDescription>
+      </DescriptionListGroup>
+    </DescriptionList>
+  );
+}
+
+function EmptyScanState({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="gitops-export-console__emptyState">
+      <Content component="h2">{title}</Content>
+      <Content component="p" className="gitops-export-console__subtle">
+        {body}
+      </Content>
+    </div>
   );
 }
 
@@ -146,6 +201,7 @@ export function LatestScanCard({
   onExpandedScanChange,
   onExpandedPreviewChange,
 }: LatestScanCardProps) {
+  const { t } = useTranslation('plugin__gitops-export-console');
   const [downloadError, setDownloadError] = React.useState('');
   const [downloadSuccess, setDownloadSuccess] = React.useState('');
   const [downloadingArchive, setDownloadingArchive] = React.useState(false);
@@ -156,14 +212,20 @@ export function LatestScanCard({
     setDownloadingArchive(false);
   }, [namespace, scan?.metadata.scannedAt]);
 
+  const scanTitle = namespace
+    ? t('Latest scan in {{namespace}}', { namespace })
+    : t('Latest scan in current namespace');
+
   if (scanning) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Latest scan in {namespace || 'current namespace'}</CardTitle>
+          <CardTitle>{scanTitle}</CardTitle>
         </CardHeader>
         <CardBody>
-          <Spinner size="lg" />
+          <div className="gitops-export-console__emptyState">
+            <Spinner size="lg" />
+          </div>
         </CardBody>
       </Card>
     );
@@ -173,12 +235,13 @@ export function LatestScanCard({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Latest scan in {namespace || 'current namespace'}</CardTitle>
+          <CardTitle>{scanTitle}</CardTitle>
         </CardHeader>
         <CardBody>
-          <Content component="p" className="gitops-export-console__subtle">
-            No scan result is shown yet.
-          </Content>
+          <EmptyScanState
+            title={t('No scan result is shown yet.')}
+            body={t('Run an export to review resource classifications and sanitized YAML.')}
+          />
         </CardBody>
       </Card>
     );
@@ -197,11 +260,14 @@ export function LatestScanCard({
     try {
       const result = await downloadScanArchive(scan);
       setDownloadSuccess(
-        `Downloaded ${result.manifestCount} manifest files as ${result.archiveName}.`,
+        t('Downloaded {{count}} manifest files as {{archiveName}}.', {
+          count: result.manifestCount,
+          archiveName: result.archiveName,
+        }),
       );
     } catch (error) {
       setDownloadError(
-        error instanceof Error ? error.message : 'Failed to generate the ZIP archive',
+        error instanceof Error ? error.message : t('Failed to generate the ZIP archive'),
       );
     } finally {
       setDownloadingArchive(false);
@@ -211,7 +277,7 @@ export function LatestScanCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Latest scan in {namespace || 'current namespace'}</CardTitle>
+        <CardTitle>{scanTitle}</CardTitle>
       </CardHeader>
       <CardBody>
         <div className="gitops-export-console__requestList">
@@ -220,22 +286,9 @@ export function LatestScanCard({
               <strong>{new Date(scan.metadata.scannedAt).toLocaleString()}</strong>
               <span>{scan.status.phase}</span>
             </div>
-            <div className="gitops-export-console__inlineList">
-              <span>
-                <span className="gitops-export-console__label">Target:</span>{' '}
-                {scan.spec.namespace}
-              </span>
-              <span>
-                <span className="gitops-export-console__label">Kinds:</span>{' '}
-                {scan.spec.includeResourceTypes?.length ?? 0}
-              </span>
-              <span>
-                <span className="gitops-export-console__label">Secrets:</span>{' '}
-                {scan.spec.secretHandling || 'redact'}
-              </span>
-            </div>
+            <ScanSummary scan={scan} />
             <Content component="p" className="gitops-export-console__subtle">
-              {scan.status.conditions?.[0]?.message ?? 'Namespace scan completed locally.'}
+              {scan.status.conditions?.[0]?.message ?? t('Namespace scan completed locally.')}
             </Content>
             <Content component="p" className="gitops-export-console__subtle">
               {summarizeCounts(scan)}
@@ -243,9 +296,14 @@ export function LatestScanCard({
             <Content component="p" className="gitops-export-console__subtle">
               {exportableResourceCount > 0
                 ? warningCount > 0
-                  ? `ZIP export will write ${exportableResourceCount} manifest files from this scan. Review, cleanup, and skipped resources are summarized in WARNINGS.md.`
-                  : `ZIP export will write ${exportableResourceCount} manifest files from this scan.`
-                : 'No exportable resources are available for this scan.'}
+                  ? t(
+                      'ZIP export will write {{count}} manifest files from this scan. Review, cleanup, and skipped resources are summarized in WARNINGS.md.',
+                      { count: exportableResourceCount },
+                    )
+                  : t('ZIP export will write {{count}} manifest files from this scan.', {
+                      count: exportableResourceCount,
+                    })
+                : t('No exportable resources are available for this scan.')}
             </Content>
             <div className="gitops-export-console__inlineActions">
               <Button
@@ -253,7 +311,7 @@ export function LatestScanCard({
                 onClick={onDownloadArchive}
                 isDisabled={downloadingArchive || exportableResourceCount === 0}
               >
-                {downloadingArchive ? 'Preparing ZIP...' : 'Download ZIP'}
+                {downloadingArchive ? t('Preparing ZIP...') : t('Download ZIP')}
               </Button>
               <Button
                 variant="link"
@@ -262,26 +320,26 @@ export function LatestScanCard({
                   onExpandedScanChange(scanExpanded ? '' : currentScanKey)
                 }
               >
-                {scanExpanded ? 'Hide details' : 'Show details'}
+                {scanExpanded ? t('Hide details') : t('Show details')}
               </Button>
             </div>
             {warningCount > 0 ? (
               <Content component="p" className="gitops-export-console__subtle">
-                The archive adds a `WARNINGS.md` file for review, cleanup, or skipped resources.
+                {t('The archive adds a `WARNINGS.md` file for review, cleanup, or skipped resources.')}
               </Content>
             ) : null}
             {downloadError ? (
-              <Alert isInline variant="danger" title="ZIP export failed">
+              <Alert isInline variant="danger" title={t('ZIP export failed')}>
                 {downloadError}
               </Alert>
             ) : null}
             {downloadSuccess ? (
-              <Alert isInline variant="success" title="ZIP archive ready">
+              <Alert isInline variant="success" title={t('ZIP archive ready')}>
                 {downloadSuccess}
               </Alert>
             ) : null}
             {scanExpanded ? (
-              <ResourceDetailsTable
+              <ResourceDetailsList
                 scan={scan}
                 expandedPreview={expandedPreview}
                 onExpandedPreviewChange={onExpandedPreviewChange}

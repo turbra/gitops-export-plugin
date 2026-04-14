@@ -81,12 +81,18 @@ export default function GitOpsExportPage({ obj }: GitOpsExportPageProps) {
   return (
     <>
       <DocumentTitle>{t('GitOps Export UI')}</DocumentTitle>
-      <ListPageHeader title={t(`GitOps Export: ${namespace || 'Namespace'}`)} />
+      <ListPageHeader
+        title={
+          namespace
+            ? t('GitOps Export: {{namespace}}', { namespace })
+            : t('GitOps Export: Namespace')
+        }
+      />
       <PageSection isFilled>
         <Grid hasGutter className="gitops-export-console__grid">
           {error ? (
             <GridItem span={12}>
-              <Alert isInline variant="danger" title="Plugin request failed">
+              <Alert isInline variant="danger" title={t('Plugin request failed')}>
                 {error}
               </Alert>
             </GridItem>
@@ -94,7 +100,7 @@ export default function GitOpsExportPage({ obj }: GitOpsExportPageProps) {
 
           {success ? (
             <GridItem span={12}>
-              <Alert isInline variant="success" title="Namespace scan completed">
+              <Alert isInline variant="success" title={t('Namespace scan completed')}>
                 {success}
               </Alert>
             </GridItem>

@@ -8,7 +8,12 @@ import {
   CardTitle,
   Checkbox,
   Content,
+  Form,
+  FormGroup,
+  FormSelect,
+  FormSelectOption,
 } from '@patternfly/react-core';
+import { useTranslation } from 'react-i18next';
 import { RESOURCE_TYPE_OPTIONS } from '../scan-utils';
 
 type ExportScanFormProps = {
@@ -30,6 +35,7 @@ export function ExportScanForm({
   onSecretHandlingChange,
   onSelectedResourceTypeKeysChange,
 }: ExportScanFormProps) {
+  const { t } = useTranslation('plugin__gitops-export-console');
   const selectAll = React.useCallback(() => {
     onSelectedResourceTypeKeysChange(RESOURCE_TYPE_OPTIONS.map((option) => option.key));
   }, [onSelectedResourceTypeKeysChange]);
@@ -52,44 +58,49 @@ export function ExportScanForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Export</CardTitle>
+        <CardTitle>{t('Export')}</CardTitle>
       </CardHeader>
       <CardBody>
         {!namespace ? (
-          <Alert isInline variant="warning" title="Namespace context unavailable">
-            Open this plugin from a namespace details page.
+          <Alert isInline variant="warning" title={t('Namespace context unavailable')}>
+            {t('Open this plugin from a namespace details page.')}
           </Alert>
         ) : (
-          <form onSubmit={onSubmit} className="gitops-export-console__controls">
-            <label className="gitops-export-console__field">
-              <span className="gitops-export-console__label">Secret handling</span>
-              <select
-                className="gitops-export-console__select"
+          <Form onSubmit={onSubmit} className="gitops-export-console__controls" isWidthLimited>
+            <FormGroup
+              label={t('Secret handling')}
+              fieldId="gitops-export-secret-handling"
+            >
+              <FormSelect
+                id="gitops-export-secret-handling"
                 value={secretHandling}
-                onChange={(event) => onSecretHandlingChange(event.currentTarget.value)}
+                onChange={(_, value) => onSecretHandlingChange(value)}
+                aria-label={t('Secret handling')}
               >
-                <option value="redact">redact</option>
-                <option value="omit">omit</option>
-                <option value="include">include</option>
-              </select>
-            </label>
+                <FormSelectOption value="redact" label={t('redact')} />
+                <FormSelectOption value="omit" label={t('omit')} />
+                <FormSelectOption value="include" label={t('include')} />
+              </FormSelect>
+            </FormGroup>
 
-            <div className="gitops-export-console__field">
+            <FormGroup
+              label={t('Resource kinds')}
+              fieldId="gitops-export-resource-kinds"
+            >
               <div className="gitops-export-console__fieldHeader">
-                <span className="gitops-export-console__label">Resource kinds</span>
                 <div className="gitops-export-console__inlineActions">
-                  <Button variant="link" isInline onClick={selectAll}>
-                    Select all
+                  <Button variant="link" isInline type="button" onClick={selectAll}>
+                    {t('Select all')}
                   </Button>
-                  <Button variant="link" isInline onClick={selectNone}>
-                    Select none
+                  <Button variant="link" isInline type="button" onClick={selectNone}>
+                    {t('Select none')}
                   </Button>
                 </div>
               </div>
               <Content component="p" className="gitops-export-console__subtle">
-                Only selected kinds are scanned and previewed in the result.
+                {t('Only selected kinds are scanned and previewed in the result.')}
               </Content>
-              <div className="gitops-export-console__checkboxGrid">
+              <div className="gitops-export-console__checkboxGrid" id="gitops-export-resource-kinds">
                 {RESOURCE_TYPE_OPTIONS.map((option) => (
                   <Checkbox
                     key={option.key}
@@ -100,12 +111,12 @@ export function ExportScanForm({
                   />
                 ))}
               </div>
-            </div>
+            </FormGroup>
 
             <Button isDisabled={scanning || selectedResourceTypeKeys.length === 0} type="submit">
-              {scanning ? 'Exporting...' : 'Export'}
+              {scanning ? t('Exporting...') : t('Export')}
             </Button>
-          </form>
+          </Form>
         )}
       </CardBody>
     </Card>

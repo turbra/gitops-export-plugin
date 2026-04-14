@@ -23,7 +23,7 @@ This guide covers how to deploy the GitOps Export console plugin to an OpenShift
 ### For local development
 
 - **Node.js 22** (matches the UBI build image)
-- **`npm`**
+- **`yarn`** or **`npm`**
 - **`oc` CLI** authenticated to a cluster (the local console bridge connects to this cluster)
 - **`podman`** or **`docker`** (to run the local console bridge container)
 
@@ -92,9 +92,10 @@ If you need to build and publish your own image (for example, to test changes or
 
 ```sh
 VERSION="$(./hack/version.sh)"
+IMAGE_TAG="$(./hack/image-tag.sh)"
 podman build --build-arg GITOPS_EXPORT_VERSION="${VERSION}" \
-  -t docker.io/<your-org>/gitops-export-console:"${VERSION}" .
-podman push docker.io/<your-org>/gitops-export-console:"${VERSION}"
+  -t docker.io/<your-org>/gitops-export-console:"${IMAGE_TAG}" .
+podman push docker.io/<your-org>/gitops-export-console:"${IMAGE_TAG}"
 ```
 
 After pushing, update the image reference in `manifests/base/kustomization.yaml`:
@@ -103,7 +104,7 @@ After pushing, update the image reference in `manifests/base/kustomization.yaml`
 images:
   - name: gitops-export-console-image
     newName: docker.io/<your-org>/gitops-export-console
-    newTag: "<VERSION>"
+    newTag: "<IMAGE_TAG>"
 ```
 
 Then re-apply the overlay:
@@ -119,29 +120,52 @@ oc delete job/gitops-export-console-install-patcher -n gitops-export-console
 oc apply -k manifests/overlays/install
 ```
 
+`hack/image-tag.sh` converts the build version into a registry-safe tag. For feature branches, prefix it so the build does not replace the tags used by `main`:
+
+```sh
+GITOPS_EXPORT_IMAGE_TAG_PREFIX=pf-i18n- ./hack/image-tag.sh
+```
+
 ## Local Plugin Development
 
-Use the split-terminal workflow to run the plugin locally against a real cluster.
+Use the same split-terminal workflow described in the OpenShift dynamic-plugin getting started guide to run the plugin locally against a real cluster.
 
 ### Terminal 1: Start the plugin dev server
+
+```sh
+yarn install
+yarn start
+```
+
+This starts the webpack dev server on `http://localhost:9001`, serving the plugin bundle with hot reload.
+
+If you prefer `npm`, the equivalent commands are:
 
 ```sh
 npm install
 npm run start
 ```
 
-This starts the webpack dev server on `http://localhost:9001`, serving the plugin bundle with hot reload.
-
 ### Terminal 2: Start the local console bridge
 
 ```sh
 oc login <cluster-url>
-npm run start-console
+yarn start-console
 ```
 
 This runs a containerized OpenShift console that connects to the cluster you logged into and loads the plugin from the local dev server. Open `http://localhost:9000` to use the console.
 
+If you prefer `npm`, use `npm run start-console`.
+
 The `start-console` script requires `podman` or `docker` and an active `oc` login session.
+
+### Refresh localization catalogs
+
+When you add or change translated UI text, regenerate the English catalog before committing:
+
+```sh
+npm run i18n
+```
 
 ## Remove the Plugin
 

@@ -75,12 +75,45 @@ oc delete -k manifests/overlays/install
 
 ```sh
 VERSION="$(./hack/version.sh)"
+IMAGE_TAG="$(./hack/image-tag.sh)"
 podman build --build-arg GITOPS_EXPORT_VERSION="${VERSION}" \
-  -t docker.io/<your-org>/gitops-export-console:"${VERSION}" .
-podman push docker.io/<your-org>/gitops-export-console:"${VERSION}"
+  -t docker.io/<your-org>/gitops-export-console:"${IMAGE_TAG}" .
+podman push docker.io/<your-org>/gitops-export-console:"${IMAGE_TAG}"
 ```
 
 After pushing, update the image reference in `manifests/base/kustomization.yaml` and re-apply the overlay. If the previous `gitops-export-console-install-patcher` Job is still present, delete it first or wait for its 300-second TTL cleanup window to expire.
+
+`hack/image-tag.sh` converts the build version into a registry-safe image tag and can also prefix feature-branch builds so they do not replace the mainline tags:
+
+```sh
+GITOPS_EXPORT_IMAGE_TAG_PREFIX=pf-i18n- ./hack/image-tag.sh
+```
+
+## Local Development
+
+Use the standard OpenShift dynamic-plugin split-terminal workflow.
+
+Terminal 1:
+
+```sh
+yarn install
+yarn start
+```
+
+Terminal 2:
+
+```sh
+oc login <cluster-url>
+yarn start-console
+```
+
+If you prefer `npm`, this repo keeps equivalent commands available: `npm install`, `npm run start`, and `npm run start-console`.
+
+When UI text changes, refresh the English message catalog before committing:
+
+```sh
+npm run i18n
+```
 
 ## Versioning
 
