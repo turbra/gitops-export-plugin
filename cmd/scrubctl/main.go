@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -347,7 +348,7 @@ func stdinHasData(reader io.Reader) bool {
 	}
 	info, err := file.Stat()
 	if err != nil {
-		return false
+		return true
 	}
 	return (info.Mode() & os.ModeCharDevice) == 0
 }
@@ -394,9 +395,14 @@ func readResource(file string, stdin io.Reader) (types.ResourceObject, error) {
 }
 
 func joinValidationErrors(errs argocd.ValidationErrors) string {
+	keys := make([]string, 0, len(errs))
+	for field := range errs {
+		keys = append(keys, field)
+	}
+	sort.Strings(keys)
 	values := make([]string, 0, len(errs))
-	for field, message := range errs {
-		values = append(values, field+": "+message)
+	for _, field := range keys {
+		values = append(values, field+": "+errs[field])
 	}
 	return strings.Join(values, ", ")
 }

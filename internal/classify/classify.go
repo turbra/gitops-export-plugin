@@ -31,11 +31,6 @@ func ClassifyResource(resource types.ResourceObject) types.ResourceClassificatio
 				return newClassification(resource, types.ClassificationReview, "Helm-managed lifecycle detected")
 			}
 		}
-		if labels, ok := metadata["labels"].(map[string]string); ok {
-			if managedBy := labels["app.kubernetes.io/managed-by"]; strings.ToLower(managedBy) == "helm" {
-				return newClassification(resource, types.ClassificationReview, "Helm-managed lifecycle detected")
-			}
-		}
 	}
 
 	if openshift.IsScaffoldingResource(resource) {

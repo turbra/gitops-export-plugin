@@ -45,7 +45,10 @@ func BuildPreviewFromSanitized(sanitized types.ResourceObject) string {
 }
 
 func SerializeResource(resource types.ResourceObject) string {
-	data, _ := yaml.Marshal(resource)
+	data, err := yaml.Marshal(resource)
+	if err != nil {
+		panic("sanitize: failed to marshal resource to YAML: " + err.Error())
+	}
 	return string(data)
 }
 
@@ -62,9 +65,14 @@ func sanitizeForExport(resource types.ResourceObject, secretHandling string) typ
 }
 
 func deepCopy(resource types.ResourceObject) types.ResourceObject {
-	data, _ := json.Marshal(resource)
+	data, err := json.Marshal(resource)
+	if err != nil {
+		panic("sanitize: failed to marshal resource for deep copy: " + err.Error())
+	}
 	var copied types.ResourceObject
-	_ = json.Unmarshal(data, &copied)
+	if err := json.Unmarshal(data, &copied); err != nil {
+		panic("sanitize: failed to unmarshal resource for deep copy: " + err.Error())
+	}
 	return copied
 }
 

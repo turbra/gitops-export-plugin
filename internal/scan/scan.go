@@ -96,7 +96,7 @@ func Run(ctx context.Context, options Options) (types.NamespaceScan, error) {
 	}, nil
 }
 
-func newDynamicClient(kubeconfigPath, kubeContext string) (dynamic.Interface, error) {
+func newClientConfig(kubeconfigPath, kubeContext string) clientcmd.ClientConfig {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	if kubeconfigPath != "" {
 		loadingRules.ExplicitPath = kubeconfigPath
@@ -105,7 +105,11 @@ func newDynamicClient(kubeconfigPath, kubeContext string) (dynamic.Interface, er
 	if kubeContext != "" {
 		overrides.CurrentContext = kubeContext
 	}
-	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides).ClientConfig()
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides)
+}
+
+func newDynamicClient(kubeconfigPath, kubeContext string) (dynamic.Interface, error) {
+	config, err := newClientConfig(kubeconfigPath, kubeContext).ClientConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -117,16 +121,7 @@ func ResolveNamespace(kubeconfigPath, kubeContext, namespaceOverride string) (st
 		return namespaceOverride, nil
 	}
 
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	if kubeconfigPath != "" {
-		loadingRules.ExplicitPath = kubeconfigPath
-	}
-	overrides := &clientcmd.ConfigOverrides{}
-	if kubeContext != "" {
-		overrides.CurrentContext = kubeContext
-	}
-
-	namespace, _, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides).Namespace()
+	namespace, _, err := newClientConfig(kubeconfigPath, kubeContext).Namespace()
 	if err != nil {
 		return "", err
 	}

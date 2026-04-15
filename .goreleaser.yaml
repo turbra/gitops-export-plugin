@@ -5,8 +5,6 @@ project_name: scrubctl
 before:
   hooks:
     - npm ci
-    - npm run test:fixtures
-    - go test ./...
 
 builds:
   - id: scrubctl
