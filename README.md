@@ -137,11 +137,13 @@ Use `hack/version.sh` (shell) or the `version.ts` module (webpack build) to comp
 
 `scrubctl` is a standalone Go CLI that scans a namespace, classifies resources, sanitizes live manifests, and exports GitOps-ready artifacts for Kubernetes and OpenShift. Use it in terminal workflows or CI/CD pipelines where the web console is not available.
 
-Install from a release archive or with Go (the binary goes to `$(go env GOPATH)/bin`, typically `~/go/bin`):
+No tagged releases have been published yet, so binary archives are not available today. Install with Go (binary lands in `$(go env GOPATH)/bin`, typically `~/go/bin`):
 
 ```sh
 go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
 ```
+
+Or build from a local clone with `make build` (binary at `./bin/scrubctl`).
 
 ```sh
 # Verify the install
@@ -167,7 +169,7 @@ scrubctl generate argocd <namespace> \
 
 When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resource directly.
 
-See [docs/cli.md](./docs/cli.md) for all install methods (release archive, `go install`, local build), PATH setup, and the full command reference.
+See [docs/cli.md](./docs/cli.md) for all install methods (`go install`, local build, and future release archives), PATH setup, and the full command reference.
 
 ## License
 

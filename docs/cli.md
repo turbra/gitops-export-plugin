@@ -10,11 +10,135 @@ description: >-
 
 ## Install
 
-Three methods are available. Choose the one that fits your situation.
+No tagged releases have been published yet, so pre-built binary archives are not available today. The two working install paths are:
+
+1. **Install with Go** — recommended if you have Go 1.21+ and just want the CLI.
+2. **Build from a local clone** — recommended if you are developing or testing changes from this repository.
+
+A third method, **Download a release archive**, is documented at the end for when releases are published.
 
 ---
 
-### Method 1: Download a release archive (recommended for most users)
+### Method 1: Install with Go (recommended)
+
+This method requires Go 1.21 or later. It downloads, builds, and installs `scrubctl` in one command.
+
+**Step 1 — Run `go install`**
+
+```sh
+go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
+```
+
+`go install` places the binary in the Go binary directory. To see that path:
+
+```sh
+go env GOPATH
+```
+
+The binary will be at `$(go env GOPATH)/bin/scrubctl`. On most systems this resolves to `~/go/bin/scrubctl`.
+
+**Step 2 — Check whether the Go binary directory is already on your PATH**
+
+Print the current `PATH` and look for the Go binary directory (`~/go/bin` or the output of `go env GOPATH`/`bin`):
+
+```sh
+echo $PATH
+```
+
+If you see `~/go/bin` (or the equivalent `$(go env GOPATH)/bin`) in the output, you are done — skip to Step 4.
+
+**Step 3 — Add the Go binary directory to your PATH (only if missing)**
+
+Append this line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) so the directory is on your `PATH` in every new terminal session:
+
+```sh
+export PATH="$PATH:$(go env GOPATH)/bin"
+```
+
+Reload the profile to apply the change in your current session:
+
+```sh
+source ~/.bashrc   # or source ~/.zshrc
+```
+
+**Step 4 — Verify**
+
+```sh
+scrubctl version
+```
+
+You should see the version string printed. If you see `command not found`, the Go binary directory is not on your `PATH` — re-check Steps 2 and 3.
+
+---
+
+### Method 2: Build from a local clone
+
+Use this method when developing or testing changes from a cloned copy of the repository, or when you do not want to pull from a module proxy.
+
+**Option A — Build into `./bin/` (run from the repo directory)**
+
+```sh
+make build
+```
+
+The binary is placed at `./bin/scrubctl` inside the repository. Run it directly from that path:
+
+```sh
+./bin/scrubctl version
+```
+
+To run it from any directory without the `./bin/` prefix, place the `scrubctl` binary in a directory that is already on your `PATH`.
+
+First, print your current `PATH`:
+
+```sh
+echo $PATH
+```
+
+Pick one of the directories you see in the output and copy the binary there. `/usr/local/bin` is the standard choice on Linux and macOS if it appears in your `PATH`:
+
+```sh
+sudo cp ./bin/scrubctl /usr/local/bin/
+```
+
+If you do not have sudo access, use a user-writable directory that is already on your `PATH`. If none of your PATH entries are user-writable, create `~/.local/bin`, copy the binary there, and add that directory to your `PATH`:
+
+```sh
+mkdir -p ~/.local/bin
+cp ./bin/scrubctl ~/.local/bin/
+```
+
+Then append this line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent):
+
+```sh
+export PATH="$PATH:$HOME/.local/bin"
+```
+
+Reload the profile:
+
+```sh
+source ~/.bashrc   # or source ~/.zshrc
+```
+
+**Option B — Install into your Go binary directory**
+
+```sh
+make install
+```
+
+This is equivalent to `go install ./cmd/scrubctl`. The binary is placed in `$(go env GOPATH)/bin/scrubctl` (typically `~/go/bin/scrubctl`). Follow Method 1, Steps 2–4 for `PATH` setup and verification.
+
+**Verify**
+
+```sh
+scrubctl version
+```
+
+---
+
+### Method 3: Download a release archive (not yet available)
+
+> **Status:** no release archives have been published yet. Once `v*.*.*` tags are cut and the `cli-release` GitHub Actions workflow publishes artifacts, the steps below will apply. Until then, use Method 1 or Method 2.
 
 This method does not require Go to be installed.
 
@@ -38,22 +162,30 @@ tar -xzf scrubctl-<version>-linux-amd64.tar.gz
 
 This produces a `scrubctl` binary (or `scrubctl.exe` on Windows) in the current directory.
 
-**Step 3 — Place the binary on your PATH**
+**Step 3 — Inspect your current PATH**
 
-To run `scrubctl` from any directory, move or copy the binary into a directory that is already on your `PATH`. `/usr/local/bin` is the standard choice on Linux and macOS:
+Before moving the binary, print your current `PATH` so you can pick a destination directory that is already on it:
+
+```sh
+echo $PATH
+```
+
+**Step 4 — Place the `scrubctl` binary in a directory that is already on your PATH**
+
+Pick one of the directories from the `echo $PATH` output and copy or move the binary there. `/usr/local/bin` is the standard choice on Linux and macOS if it appears in your `PATH`:
 
 ```sh
 sudo mv scrubctl /usr/local/bin/
 ```
 
-If you do not have sudo access, move it to a user-writable directory instead and add that directory to your `PATH`:
+If you do not have sudo access, use a user-writable directory that is already on your `PATH`. If none of your PATH entries are user-writable, create `~/.local/bin`, move the binary there, and add that directory to your `PATH`:
 
 ```sh
 mkdir -p ~/.local/bin
 mv scrubctl ~/.local/bin/
 ```
 
-Then add the following line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) so the directory is on your `PATH` in every new terminal session:
+Then append this line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) so `~/.local/bin` is on your `PATH` in every new terminal session:
 
 ```sh
 export PATH="$PATH:$HOME/.local/bin"
@@ -65,91 +197,19 @@ Reload the profile to apply the change in your current session:
 source ~/.bashrc   # or source ~/.zshrc
 ```
 
-**Step 4 — Verify**
+Confirm the directory is now on your `PATH`:
+
+```sh
+echo $PATH
+```
+
+**Step 5 — Verify**
 
 ```sh
 scrubctl version
 ```
 
-You should see the version string printed. If you see `command not found`, the binary is not on your `PATH` — re-check step 3.
-
----
-
-### Method 2: Install with Go (no local clone required)
-
-This method requires Go 1.21 or later. It downloads, builds, and installs `scrubctl` in one command.
-
-```sh
-go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
-```
-
-**Where the binary is placed**
-
-`go install` places the binary in the Go binary directory. To see that path:
-
-```sh
-go env GOPATH
-```
-
-The binary will be at `$(go env GOPATH)/bin/scrubctl`. On most systems this is `~/go/bin/scrubctl`.
-
-**Add the Go binary directory to your PATH**
-
-If `~/go/bin` is not already on your `PATH`, add it:
-
-```sh
-export PATH="$PATH:$(go env GOPATH)/bin"
-```
-
-Add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) to make it permanent, then reload:
-
-```sh
-source ~/.bashrc   # or source ~/.zshrc
-```
-
-**Verify**
-
-```sh
-scrubctl version
-```
-
----
-
-### Method 3: Build from a local clone
-
-Use this method when developing or testing changes from a cloned copy of the repository.
-
-**Option A — Build into `./bin/` (run from the repo directory)**
-
-```sh
-make build
-```
-
-The binary is placed at `./bin/scrubctl` inside the repository. Run it directly from that path:
-
-```sh
-./bin/scrubctl version
-```
-
-To run it from any directory without a path prefix, copy it somewhere on your `PATH`:
-
-```sh
-sudo cp ./bin/scrubctl /usr/local/bin/
-```
-
-**Option B — Install into your Go binary directory**
-
-```sh
-make install
-```
-
-This is equivalent to `go install ./cmd/scrubctl`. The binary is placed in `$(go env GOPATH)/bin/scrubctl` (typically `~/go/bin/scrubctl`). See Method 2 above for `PATH` setup instructions.
-
-**Verify**
-
-```sh
-scrubctl version
-```
+You should see the version string printed. If you see `command not found`, the binary is not on your `PATH` — re-check Steps 3 and 4.
 
 ---
 
