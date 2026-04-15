@@ -135,7 +135,7 @@ Use `hack/version.sh` (shell) or the `version.ts` module (webpack build) to comp
 
 ## scrubctl CLI
 
-`scrubctl` is a standalone Go CLI that scans a namespace, classifies resources, sanitizes live manifests, and exports GitOps-ready artifacts for Kubernetes and OpenShift through a terminal workflow that is not available natively in the web console.
+`scrubctl` is a standalone Go CLI that scans a namespace, classifies resources, sanitizes live manifests, and exports GitOps-ready artifacts for Kubernetes and OpenShift. Use it in terminal workflows or CI/CD pipelines where the web console is not available.
 
 Install from a release archive or directly:
 
