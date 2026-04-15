@@ -12,7 +12,7 @@ Everything runs in your browser. The plugin never modifies resources in your nam
 
 ## Prerequisites
 
-- OpenShift 4.18 or later
+- **OpenShift 4.20 or later** (this branch targets the PatternFly 6 / dynamic-plugin-sdk 4.21 console API). For OpenShift 4.18, use the `feature/ocp-4.18-compat` branch, which pins PatternFly 5 and SDK 4.18.
 - `oc` CLI logged in to the cluster
 - `cluster-admin` (or equivalent permissions to create the install resources)
 

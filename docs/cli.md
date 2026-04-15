@@ -43,7 +43,7 @@ scrubctl version
 ### Notes
 
 - If `/usr/local/bin` is not on your `PATH`, run `echo $PATH` and either move `scrubctl` into a directory that is listed, or add its directory to your `PATH` (for example, `export PATH="$PATH:$HOME/.local/bin"` in `~/.bashrc` or `~/.zshrc`).
-- If you prefer `go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest`, the binary is placed in `$(go env GOBIN)` if set, otherwise `$(go env GOPATH)/bin` (typically `~/go/bin`). Add that directory to your `PATH`, or copy `scrubctl` from it into `/usr/local/bin/`.
+- `go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest` will work once the CLI lands on the default branch; today it lives on `feature/cli-plugin`, so use `@feature/cli-plugin` or build from a local clone instead. The binary is placed in `$(go env GOBIN)` if set, otherwise `$(go env GOPATH)/bin` (typically `~/go/bin`). Add that directory to your `PATH`, or copy `scrubctl` from it into `/usr/local/bin/`.
 
 ## Usage
 
@@ -220,6 +220,6 @@ Use the CLI-only Make targets from the repo root:
 | Target | What it does |
 |--------|-------------|
 | `make build` | Compiles `scrubctl` to `./bin/scrubctl` |
-| `make install` | Installs `scrubctl` to `$(go env GOPATH)/bin` |
+| `make install` | Runs `go install ./cmd/scrubctl`; binary lands in `$(go env GOBIN)` if set, otherwise `$(go env GOPATH)/bin` |
 | `make test` | Runs Go unit tests and TypeScript fixture parity tests |
 | `make fixtures` | Regenerates TypeScript fixture expectations |

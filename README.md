@@ -1,6 +1,6 @@
 # GitOps Export Plugin
 
-An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/web_console/dynamic-plugins#overview-of-dynamic-plugins_customizing-web-console) that helps teams move from cluster-first resource management to GitOps. It scans a namespace, classifies each resource, strips cluster-generated noise from live manifests, produces clean YAML previews, downloads the result as a ZIP archive, and generates Argo CD Application YAML for Git-based rollout.
+An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/web_console/dynamic-plugins#overview-of-dynamic-plugins_customizing-web-console) that helps teams move from cluster-first resource management to GitOps. It scans a namespace, classifies each resource, strips cluster-generated noise from live manifests, produces clean YAML previews, downloads the result as a ZIP archive, and generates Argo CD Application YAML for Git-based rollout.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-2C7A7B?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
 ![OpenShift Console Plugin](https://img.shields.io/badge/OpenShift-console%20plugin-EE0000?style=flat-square)
@@ -40,7 +40,7 @@ This repository contains two separate tools that share the same curated resource
 
 ### Prerequisites
 
-- OpenShift 4.18 or later
+- **OpenShift 4.20 or later** (this branch targets the PatternFly 6 / dynamic-plugin-sdk 4.21 console API). For OpenShift 4.18, use the `feature/ocp-4.18-compat` branch, which pins PatternFly 5 and SDK 4.18.
 - `oc` CLI authenticated to the target cluster with `cluster-admin` (for initial install) or permission to create the resources in the install overlay
 
 ### Install

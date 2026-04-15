@@ -12,7 +12,7 @@ This guide has two parts. The first covers the console plugin: deploying it to a
 
 ### For cluster deployment
 
-- **OpenShift 4.18 or later** with the console operator enabled (the default)
+- **OpenShift 4.20 or later** (this branch targets the PatternFly 6 / dynamic-plugin-sdk 4.21 console API). For OpenShift 4.18, use the `feature/ocp-4.18-compat` branch, which pins PatternFly 5 and SDK 4.18.
 - **`oc` CLI** authenticated to the target cluster
 - **`cluster-admin`** role, or permissions to create a Namespace, Deployment, Service, ConfigMap, ConsolePlugin, Job, ServiceAccount, ClusterRole, and ClusterRoleBinding (the install overlay includes a Job that patches `consoles.operator.openshift.io/cluster` using its own dedicated ClusterRole; the installer does not need that permission directly). See the [RBAC Reference]({{ '/rbac-reference.html' | relative_url }}) for details.
 
