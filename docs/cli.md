@@ -6,20 +6,22 @@ description: >-
 
 # scrubctl
 
-`scrubctl` is a standalone Go CLI for namespace scan, resource classification, manifest sanitization, ZIP export, and Argo CD Application generation. It works anywhere you have `kubectl` or `oc` — no OpenShift console required.
+`scrubctl` is a standalone Go CLI for namespace scan, resource classification, manifest sanitization, ZIP export, and Argo CD Application generation. It runs as a local binary — no OpenShift console required.
+
+The cluster-facing subcommands (`scan`, `export`, `generate argocd`) read your active kubeconfig the same way `kubectl` or `oc` do. The `scrub` subcommand and stdin pipe mode work on local YAML only, so they need no cluster access and no kubeconfig.
 
 ## Install
 
 No tagged releases have been published yet, so pre-built binary archives are not available today. The two working install paths are:
 
-1. **Install with Go** — recommended if you have Go 1.21+ and just want the CLI.
-2. **Build from a local clone** — recommended if you are developing or testing changes from this repository.
+1. **Install with Go** — if you have Go 1.21+ and just want the CLI.
+2. **Build from a local clone** — if you are developing or testing changes from this repository.
 
 A third method, **Download a release archive**, is documented at the end for when releases are published.
 
 ---
 
-### Method 1: Install with Go (recommended)
+### Method 1: Install with Go
 
 This method requires Go 1.21 or later. It downloads, builds, and installs `scrubctl` in one command.
 
@@ -29,45 +31,67 @@ This method requires Go 1.21 or later. It downloads, builds, and installs `scrub
 go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
 ```
 
-`go install` places the binary in the Go binary directory. To see that path:
+**Step 2 — Find where the binary was placed**
+
+`go install` honours `GOBIN` if it is set, otherwise it uses `$GOPATH/bin`. Check both:
 
 ```sh
+go env GOBIN
 go env GOPATH
 ```
 
-The binary will be at `$(go env GOPATH)/bin/scrubctl`. On most systems this resolves to `~/go/bin/scrubctl`.
+- If `go env GOBIN` prints a path, the binary is at `$(go env GOBIN)/scrubctl`.
+- If `go env GOBIN` is empty, the binary is at `$(go env GOPATH)/bin/scrubctl` (typically `~/go/bin/scrubctl`).
 
-**Step 2 — Check whether the Go binary directory is already on your PATH**
+Call the directory from above the **install directory** for the rest of this section.
 
-Print the current `PATH` and look for the Go binary directory (`~/go/bin` or the output of `go env GOPATH`/`bin`):
+**Step 3 — Check whether the install directory is already on your PATH**
+
+Print your current `PATH` and look for the install directory:
 
 ```sh
 echo $PATH
 ```
 
-If you see `~/go/bin` (or the equivalent `$(go env GOPATH)/bin`) in the output, you are done — skip to Step 4.
+If the install directory is already listed, skip to Step 5.
 
-**Step 3 — Add the Go binary directory to your PATH (only if missing)**
+**Step 4 — Add the install directory to your PATH (only if missing)**
 
-Append this line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) so the directory is on your `PATH` in every new terminal session:
+You have two choices:
+
+**Choice A — Add the install directory to your PATH.** Append the matching line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) so the directory is on your `PATH` in every new terminal session:
 
 ```sh
+# If GOBIN is set:
+export PATH="$PATH:$(go env GOBIN)"
+
+# If GOBIN is empty:
 export PATH="$PATH:$(go env GOPATH)/bin"
 ```
 
-Reload the profile to apply the change in your current session:
+Reload the profile to apply the change in the current session:
 
 ```sh
 source ~/.bashrc   # or source ~/.zshrc
 ```
 
-**Step 4 — Verify**
+**Choice B — Copy the binary into a directory that is already on your PATH.** If you would rather not edit your profile, copy `scrubctl` from the install directory into any directory from your `echo $PATH` output. `/usr/local/bin` is the standard choice on Linux and macOS:
+
+```sh
+# If GOBIN is set:
+sudo cp "$(go env GOBIN)/scrubctl" /usr/local/bin/
+
+# If GOBIN is empty:
+sudo cp "$(go env GOPATH)/bin/scrubctl" /usr/local/bin/
+```
+
+**Step 5 — Verify**
 
 ```sh
 scrubctl version
 ```
 
-You should see the version string printed. If you see `command not found`, the Go binary directory is not on your `PATH` — re-check Steps 2 and 3.
+You should see the version string printed. If you see `command not found`, the install directory is not on your `PATH` and you did not copy the binary elsewhere — re-check Steps 3 and 4.
 
 ---
 
@@ -126,7 +150,7 @@ source ~/.bashrc   # or source ~/.zshrc
 make install
 ```
 
-This is equivalent to `go install ./cmd/scrubctl`. The binary is placed in `$(go env GOPATH)/bin/scrubctl` (typically `~/go/bin/scrubctl`). Follow Method 1, Steps 2–4 for `PATH` setup and verification.
+This is equivalent to `go install ./cmd/scrubctl`. The binary lands in `$(go env GOBIN)` if `GOBIN` is set, otherwise `$(go env GOPATH)/bin`. Follow Method 1, Steps 2–5 for locating the binary, PATH setup (choice A or choice B), and verification.
 
 **Verify**
 
@@ -258,6 +282,30 @@ Flags:
       --secret-handling string   Secret handling mode: redact, omit, or include (default "redact")
 
 Use "scrubctl [command] --help" for more information about a command.
+```
+
+### Quick examples
+
+Five of the most common invocations at a glance. Each one maps to a full section under **Commands** below.
+
+```sh
+# Scrub a single resource file — no cluster access needed
+scrubctl scrub -f deployment.yaml
+
+# Pipe a live resource through scrubctl
+oc get deploy/web -n my-app -o yaml | scrubctl
+
+# Scan a namespace and print the classification table
+scrubctl scan my-app
+
+# Export a namespace as a ZIP archive into ./out
+scrubctl export my-app -o ./out
+
+# Generate an Argo CD Application manifest
+scrubctl generate argocd my-app \
+  --repo-url https://github.com/example/repo.git \
+  --revision main \
+  --path manifests/overlays/install
 ```
 
 ## Commands
