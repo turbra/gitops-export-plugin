@@ -150,7 +150,23 @@ source ~/.bashrc   # or source ~/.zshrc
 make install
 ```
 
-This is equivalent to `go install ./cmd/scrubctl`. The binary lands in `$(go env GOBIN)` if `GOBIN` is set, otherwise `$(go env GOPATH)/bin`. Follow Method 1, Steps 2–5 for locating the binary, PATH setup (choice A or choice B), and verification.
+This is equivalent to `go install ./cmd/scrubctl`. Locate the binary the same way as Method 1 — check both:
+
+```sh
+go env GOBIN
+go env GOPATH
+```
+
+- If `go env GOBIN` prints a path, the binary is at `$(go env GOBIN)/scrubctl`.
+- If `go env GOBIN` is empty, the binary is at `$(go env GOPATH)/bin/scrubctl` (typically `~/go/bin/scrubctl`).
+
+Before moving or sourcing it, inspect your current PATH:
+
+```sh
+echo $PATH
+```
+
+Then follow Method 1, Steps 4–5 for PATH setup (choice A to add the install directory, choice B to copy the binary into a directory already on `PATH`) and verification.
 
 **Verify**
 
