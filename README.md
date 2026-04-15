@@ -1,11 +1,16 @@
 # GitOps Export Plugin
 
-An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/web_console/dynamic-plugins#overview-of-dynamic-plugins_customizing-web-console) that helps teams move from cluster-first resource management to GitOps. It scans a namespace, classifies each resource, strips cluster-generated noise from live manifests, produces clean YAML previews, downloads the result as a ZIP archive, and generates Argo CD Application YAML for Git-based rollout.
+An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/web_console/dynamic-plugins#overview-of-dynamic-plugins_customizing-web-console) that helps teams move from cluster-first resource management to GitOps. It scans a namespace, classifies each resource, strips cluster-generated noise from live manifests, produces clean YAML previews, downloads the result as a ZIP archive, and generates Argo CD Application YAML for Git-based rollout.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-2C7A7B?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
 ![OpenShift Console Plugin](https://img.shields.io/badge/OpenShift-console%20plugin-EE0000?style=flat-square)
 
-## What It Does
+This repository contains two separate tools that share the same curated resource set and sanitization logic:
+
+- **`gitops-export-plugin`** — the OpenShift console plugin. Runs entirely in your browser. Install it once per cluster; every user who can access the console can use it with no extra tooling.
+- **`scrubctl`** — a standalone Go CLI. Works anywhere you have `kubectl` or `oc`. No cluster-side install required. Built for pipes, CI pipelines, and terminal-first workflows.
+
+## What The Console Plugin Does
 
 - Scans selected resource kinds in a namespace directly from the OpenShift console
 - Classifies each resource as **include**, **cleanup**, **review**, or **exclude** with an explanation of why
@@ -26,6 +31,7 @@ An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift
 |----------|----------|-------------|
 | [User Guide](./docs/user-guide.md) | New users | Install, use, and understand GitOps Export in one page |
 | [Getting Started](./docs/getting-started.md) | Operators and contributors | Full deployment reference, local development, and image builds |
+| [CLI](./docs/cli.md) | Pipeline users, contributors, and operators | `scrubctl` standalone CLI — install, commands, and usage reference |
 | [Architecture](./docs/architecture-and-deployment.md) | Operators and contributors | Runtime components, namespace model, scan flow, and security model |
 | [Manifest Parsing and Pruning](./docs/manifest-parsing-and-pruning.md) | Contributors and advanced users | How the plugin classifies resources, sanitizes metadata, and builds YAML previews from live objects |
 | [RBAC Reference](./docs/rbac-reference.md) | Operators and security teams | Permissions required to install, run, and use the plugin |
@@ -34,7 +40,7 @@ An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift
 
 ### Prerequisites
 
-- OpenShift 4.20 or later
+- **OpenShift 4.20 or later** (this branch targets the PatternFly 6 / dynamic-plugin-sdk 4.21 console API). For OpenShift 4.18, use the `feature/ocp-4.18-compat` branch, which pins PatternFly 5 and SDK 4.18.
 - `oc` CLI authenticated to the target cluster with `cluster-admin` (for initial install) or permission to create the resources in the install overlay
 
 ### Install
@@ -126,6 +132,41 @@ Release versions are derived from git tags. Create tags in `vX.Y.Z` format.
 | No release tags exist | `0.0.0-dev+<sha>` |
 
 Use `hack/version.sh` (shell) or the `version.ts` module (webpack build) to compute the version from a checkout.
+
+## scrubctl CLI
+
+`scrubctl` is a standalone Go CLI that scans a namespace, classifies resources, sanitizes live manifests, and exports GitOps-ready artifacts for Kubernetes and OpenShift. Use it in terminal workflows or CI/CD pipelines where the web console is not available.
+
+Install in three steps: build or download the binary, place it in a directory on your `PATH`, and verify with `scrubctl version`. Build from source in a local clone (no tagged releases have been published yet):
+
+```sh
+go build -o scrubctl ./cmd/scrubctl
+sudo mv scrubctl /usr/local/bin/
+scrubctl version
+```
+
+```sh
+# Pipe a live resource directly
+oc get deploy/<name> -n <namespace> -o yaml | scrubctl
+kubectl get deploy/<name> -n <namespace> -o yaml | scrubctl
+
+# Scan and export a whole namespace
+scrubctl scan <namespace>
+scrubctl export <namespace> -o .
+
+# Scrub a single resource file
+scrubctl scrub -f deployment.yaml
+
+# Generate an Argo CD Application manifest
+scrubctl generate argocd <namespace> \
+  --repo-url https://github.com/example/repo.git \
+  --revision main \
+  --path manifests/overlays/install
+```
+
+When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resource directly.
+
+See [docs/cli.md](./docs/cli.md) for the release-archive install path, `go install` notes, and the full command reference.
 
 ## License
 

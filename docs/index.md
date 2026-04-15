@@ -1,7 +1,7 @@
 ---
 title: GitOps Export
 description: >-
-  Documentation home for the GitOps Export OpenShift console plugin.
+  Documentation home for the GitOps Export console plugin and scrubctl CLI.
 ---
 
 <div class="gxp-badge-row">
@@ -20,7 +20,7 @@ Use these pages in this order when you are orienting yourself:
 - <a href="{{ '/getting-started.html' | relative_url }}"><kbd>GETTING STARTED</kbd></a>
   for deployment details, image builds, and re-apply behavior
 
-## What The Plugin Covers
+## What The Console Plugin Does
 
 <div class="gxp-card-grid">
   <div class="gxp-card">
@@ -40,6 +40,12 @@ Use these pages in this order when you are orienting yourself:
     <p>Generates a GitOps-ready Application definition from the latest sanitized export without creating cluster resources directly.</p>
   </div>
 </div>
+
+## scrubctl CLI
+
+`scrubctl` is a standalone Go CLI that runs namespace scan, classification, sanitization, ZIP export, and Argo CD Application generation without the OpenShift console. It works wherever `kubectl` or `oc` works — in CI pipelines, against non-OpenShift clusters, or anywhere you prefer a terminal workflow.
+
+- <a href="{{ '/cli.html' | relative_url }}"><kbd>CLI REFERENCE</kbd></a> for install, commands, and global flags
 
 ## Screenshots
 

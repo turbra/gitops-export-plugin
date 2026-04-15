@@ -8,11 +8,11 @@ description: >-
 
 GitOps Export is an OpenShift console plugin that helps you move resources already running in a namespace into Git. It scans the namespace, cleans up cluster-generated noise from each manifest, and gives you a downloadable ZIP of Git-ready YAML. It can also generate an Argo CD Application so you can start managing those resources through GitOps.
 
-Everything runs in your browser. The plugin never modifies resources in your namespace -- it only reads them.
+Everything runs in your browser. The plugin never modifies resources in your namespace; it only reads them.
 
 ## Prerequisites
 
-- OpenShift 4.20 or later
+- **OpenShift 4.20 or later** (this branch targets the PatternFly 6 / dynamic-plugin-sdk 4.21 console API). For OpenShift 4.18, use the `feature/ocp-4.18-compat` branch, which pins PatternFly 5 and SDK 4.18.
 - `oc` CLI logged in to the cluster
 - `cluster-admin` (or equivalent permissions to create the install resources)
 
@@ -51,7 +51,7 @@ The scan result shows every resource classified into one of four categories:
 | **include** | Ready for Git as-is after sanitization |
 | **cleanup** | Exported, but contains environment-specific values you should review (e.g. PVC bindings, LoadBalancer settings) |
 | **review** | Exported, but needs attention before committing (e.g. Secrets, Helm-managed resources) |
-| **exclude** | Not exported -- controller-owned, runtime-generated, or OpenShift scaffolding |
+| **exclude** | Not exported: controller-owned, runtime-generated, or OpenShift scaffolding |
 
 From the result you can:
 
@@ -96,7 +96,7 @@ The GitOps definition form pre-fills common values. Review them before using the
 
 ## RBAC
 
-The plugin respects your existing OpenShift permissions. It lists resources using your session through the console proxy -- if you can't `list` a resource kind in that namespace, the plugin silently skips it.
+The plugin respects your existing OpenShift permissions. It lists resources using your session through the console proxy; if you can't `list` a resource kind in that namespace, the plugin silently skips it.
 
 - **`admin` role**: Full access to all 18 scannable resource kinds
 - **`edit` role**: Everything except Role and RoleBinding (not selected by default, so most scans are unaffected)
@@ -151,9 +151,15 @@ oc apply -f <application-name>.yaml
 
 Argo CD will now sync the exported manifests from Git to the destination namespace. If you chose **manual** sync mode, open the Argo CD UI and click **Sync** to trigger the first deployment.
 
+## Prefer a terminal or pipeline?
+
+`scrubctl` is a standalone CLI that runs the same scan, classification, sanitization, and export flow without the OpenShift console. Use it to pipe resources directly, run scans in CI, or work on clusters where you have no console access.
+
+See [CLI Reference]({{ '/cli.html' | relative_url }}) for install instructions and the full command reference.
+
 ## How it works (briefly)
 
-The plugin is a static JavaScript bundle served by an nginx pod in the `gitops-export-console` namespace. The console loads the bundle, but all scan logic -- listing resources, classifying them, sanitizing manifests, building ZIP archives -- runs in your browser. The nginx pod never makes Kubernetes API calls; it only serves files.
+The plugin is a static JavaScript bundle served by an nginx pod in the `gitops-export-console` namespace. The console loads the bundle, but all scan logic (listing resources, classifying them, sanitizing manifests, building ZIP archives) runs in your browser. The nginx pod never makes Kubernetes API calls; it only serves files.
 
 For deeper technical detail, see [Architecture and Deployment]({{ '/architecture-and-deployment.html' | relative_url }}) and [Manifest Parsing and Pruning]({{ '/manifest-parsing-and-pruning.html' | relative_url }}).
 
