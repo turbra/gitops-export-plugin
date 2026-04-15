@@ -167,6 +167,16 @@ When you add or change translated UI text, regenerate the English catalog before
 npm run i18n
 ```
 
+## scrubctl CLI
+
+`scrubctl` is a standalone CLI that does not require the console plugin. Install it from a release archive or with Go:
+
+```sh
+go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
+```
+
+See [CLI Reference]({{ '/cli.html' | relative_url }}) for commands, global flags, and usage examples.
+
 ## Remove the Plugin
 
 ```sh

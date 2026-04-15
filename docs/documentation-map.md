@@ -16,6 +16,8 @@ The docs are separated on purpose:
 
 - read the user guide when you want the shortest path from plugin install to
   GitOps-ready output
+- read the CLI reference when you want to use `scrubctl` from a terminal,
+  pipeline, or without the OpenShift console
 - read the getting-started guide when you are operating the deployment, building
   images, or re-applying the install overlay
 - read architecture and parsing pages when you need to understand how the plugin
@@ -32,6 +34,10 @@ pages from drifting into operator instructions.
 
 1. <a href="{{ '/user-guide.html' | relative_url }}"><kbd>USER GUIDE</kbd></a>
 2. return to <a href="{{ '/' | relative_url }}"><kbd>DOCS HOME</kbd></a> if you need screenshots or repo links
+
+### I want to use scrubctl in a terminal or CI pipeline
+
+1. <a href="{{ '/cli.html' | relative_url }}"><kbd>CLI REFERENCE</kbd></a>
 
 ### I need to deploy, upgrade, or rebuild the plugin
 
@@ -50,9 +56,12 @@ pages from drifting into operator instructions.
 
 ## Main Workflow Paths
 
-- Fast end-user path:
+- Console plugin end-user path:
   <a href="{{ '/user-guide.html' | relative_url }}">User Guide</a> for install,
-  export, ZIP contents, and Argo CD Application generation
+  export, ZIP contents, and Argo CD Application generation from the browser
+- Terminal and pipeline path:
+  <a href="{{ '/cli.html' | relative_url }}">CLI Reference</a> for `scrubctl`
+  install, subcommands, and pipe-based usage
 - Operator deployment path:
   <a href="{{ '/getting-started.html' | relative_url }}">Getting Started</a>
   for install, re-apply behavior, local development, and image publication
@@ -75,6 +84,10 @@ pages from drifting into operator instructions.
 ### I need to use the plugin from the console
 
 - [User Guide]({{ '/user-guide.html' | relative_url }})
+
+### I want to export resources from the terminal or a CI pipeline
+
+- [CLI Reference]({{ '/cli.html' | relative_url }})
 
 ### I need to understand the browser-side execution model
 

@@ -1,12 +1,12 @@
 ---
 title: CLI
 description: >-
-  Install and use scrubctl outside the OpenShift console.
+  scrubctl is a standalone Go CLI for namespace scan, export, and sanitization.
 ---
 
 # scrubctl
 
-`scrubctl` brings the same namespace scan, classification, sanitization, ZIP export, and Argo CD Application generation flow to terminal-first use cases.
+`scrubctl` is a standalone Go CLI for namespace scan, resource classification, manifest sanitization, ZIP export, and Argo CD Application generation. It works anywhere you have `kubectl` or `oc` — no OpenShift console required.
 
 ## Install
 
@@ -50,7 +50,7 @@ If you do not pass a namespace argument, the CLI falls back to `-n/--namespace` 
 
 ## Resource scope
 
-V1 intentionally supports the same curated resource set as the console plugin:
+`scrubctl` supports a curated set of namespaced resource kinds:
 
 - Kubernetes: Deployment, StatefulSet, DaemonSet, Job, CronJob, Service, Secret, ConfigMap, PersistentVolumeClaim, NetworkPolicy, HorizontalPodAutoscaler, Role, RoleBinding, ServiceAccount
 - OpenShift: Route, BuildConfig, ImageStream, ImageStreamTag

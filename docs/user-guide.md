@@ -151,6 +151,12 @@ oc apply -f <application-name>.yaml
 
 Argo CD will now sync the exported manifests from Git to the destination namespace. If you chose **manual** sync mode, open the Argo CD UI and click **Sync** to trigger the first deployment.
 
+## Prefer a terminal or pipeline?
+
+`scrubctl` is a standalone CLI that runs the same scan, classification, sanitization, and export flow without the OpenShift console. Use it to pipe resources directly, run scans in CI, or work on clusters where you have no console access.
+
+See [CLI Reference]({{ '/cli.html' | relative_url }}) for install instructions and the full command reference.
+
 ## How it works (briefly)
 
 The plugin is a static JavaScript bundle served by an nginx pod in the `gitops-export-console` namespace. The console loads the bundle, but all scan logic -- listing resources, classifying them, sanitizing manifests, building ZIP archives -- runs in your browser. The nginx pod never makes Kubernetes API calls; it only serves files.

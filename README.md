@@ -5,7 +5,12 @@ An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-2C7A7B?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
 ![OpenShift Console Plugin](https://img.shields.io/badge/OpenShift-console%20plugin-EE0000?style=flat-square)
 
-## What It Does
+This repository contains two separate tools that share the same curated resource set and sanitization logic:
+
+- **`gitops-export-plugin`** — the OpenShift console plugin. Runs entirely in your browser. Install it once per cluster; every user who can access the console can use it with no extra tooling.
+- **`scrubctl`** — a standalone Go CLI. Works anywhere you have `kubectl` or `oc`. No cluster-side install required. Built for pipes, CI pipelines, and terminal-first workflows.
+
+## What The Console Plugin Does
 
 - Scans selected resource kinds in a namespace directly from the OpenShift console
 - Classifies each resource as **include**, **cleanup**, **review**, or **exclude** with an explanation of why
@@ -13,7 +18,6 @@ An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift
 - Renders a sanitized YAML preview for each resource so you can see what a clean export would look like
 - Downloads a ZIP archive of the sanitized manifests directly from the browser
 - Generates Argo CD Application YAML from the latest sanitized export
-- Ships `scrubctl`, a Go-based standalone CLI for pipes, kubectl, and terminal-first workflows
 - Respects OpenShift RBAC: the plugin only shows resources the current user can list in that namespace
 - Offers three secret handling modes: **redact** (default), **omit**, or **include**
 
@@ -27,7 +31,7 @@ An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift
 |----------|----------|-------------|
 | [User Guide](./docs/user-guide.md) | New users | Install, use, and understand GitOps Export in one page |
 | [Getting Started](./docs/getting-started.md) | Operators and contributors | Full deployment reference, local development, and image builds |
-| [CLI](./docs/cli.md) | Operators, contributors, and pipeline users | Install and run `scrubctl` outside the OpenShift console |
+| [CLI](./docs/cli.md) | Pipeline users, contributors, and operators | `scrubctl` standalone CLI — install, commands, and usage reference |
 | [Architecture](./docs/architecture-and-deployment.md) | Operators and contributors | Runtime components, namespace model, scan flow, and security model |
 | [Manifest Parsing and Pruning](./docs/manifest-parsing-and-pruning.md) | Contributors and advanced users | How the plugin classifies resources, sanitizes metadata, and builds YAML previews from live objects |
 | [RBAC Reference](./docs/rbac-reference.md) | Operators and security teams | Permissions required to install, run, and use the plugin |
@@ -73,27 +77,28 @@ This creates the `gitops-export-console` namespace, deploys the plugin, and runs
 oc delete -k manifests/overlays/install
 ```
 
-## CLI
+## scrubctl CLI
 
-The repository also ships `scrubctl` for offline, pipe-based, and pipeline workflows. Install it directly:
+`scrubctl` is a standalone Go CLI for namespace export without the OpenShift console. Use it in CI pipelines, with `kubectl` on non-OpenShift clusters, or anywhere you prefer a terminal workflow over a browser UI.
+
+Install from a release archive or directly:
 
 ```sh
 go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
 ```
-
-or download a release archive and place `scrubctl` on your `PATH`.
-
-The primary command is standalone and pipe-friendly:
 
 ```sh
 oc get deploy/green-cursor -o yaml | scrubctl
 kubectl get deploy/green-cursor -o yaml | scrubctl
 scrubctl scan <namespace>
 scrubctl export <namespace> -o .
+scrubctl scrub -f resource.yaml
 scrubctl generate argocd <namespace> --repo-url ... --revision ... --path ...
 ```
 
-See [docs/cli.md](./docs/cli.md) for the full command reference and release/install details.
+When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resource directly.
+
+See [docs/cli.md](./docs/cli.md) for the full command reference, global flags, and release downloads.
 
 ## Building and Publishing the Plugin Image
 
