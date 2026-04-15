@@ -10,15 +10,159 @@ description: >-
 
 ## Install
 
-### Direct binary
+Three methods are available. Choose the one that fits your situation.
 
-Download a release archive from GitHub Releases and place `scrubctl` on your `PATH`.
+---
 
-### From source
+### Method 1: Download a release archive (recommended for most users)
+
+This method does not require Go to be installed.
+
+**Step 1 — Download the archive for your platform**
+
+Go to the [GitHub Releases page](https://github.com/turbra/gitops-export-plugin/releases) and download the archive that matches your operating system and CPU:
+
+| Platform | Architecture | File to download |
+|----------|-------------|-----------------|
+| Linux | x86-64 | `scrubctl-<version>-linux-amd64.tar.gz` |
+| Linux | ARM 64-bit | `scrubctl-<version>-linux-arm64.tar.gz` |
+| macOS | Apple Silicon | `scrubctl-<version>-darwin-arm64.tar.gz` |
+| macOS | Intel | `scrubctl-<version>-darwin-amd64.tar.gz` |
+| Windows | x86-64 | `scrubctl-<version>-windows-amd64.zip` |
+
+**Step 2 — Extract the archive**
+
+```sh
+tar -xzf scrubctl-<version>-linux-amd64.tar.gz
+```
+
+This produces a `scrubctl` binary (or `scrubctl.exe` on Windows) in the current directory.
+
+**Step 3 — Place the binary on your PATH**
+
+To run `scrubctl` from any directory, move or copy the binary into a directory that is already on your `PATH`. `/usr/local/bin` is the standard choice on Linux and macOS:
+
+```sh
+sudo mv scrubctl /usr/local/bin/
+```
+
+If you do not have sudo access, move it to a user-writable directory instead and add that directory to your `PATH`:
+
+```sh
+mkdir -p ~/.local/bin
+mv scrubctl ~/.local/bin/
+```
+
+Then add the following line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) so the directory is on your `PATH` in every new terminal session:
+
+```sh
+export PATH="$PATH:$HOME/.local/bin"
+```
+
+Reload the profile to apply the change in your current session:
+
+```sh
+source ~/.bashrc   # or source ~/.zshrc
+```
+
+**Step 4 — Verify**
+
+```sh
+scrubctl version
+```
+
+You should see the version string printed. If you see `command not found`, the binary is not on your `PATH` — re-check step 3.
+
+---
+
+### Method 2: Install with Go (no local clone required)
+
+This method requires Go 1.21 or later. It downloads, builds, and installs `scrubctl` in one command.
 
 ```sh
 go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
 ```
+
+**Where the binary is placed**
+
+`go install` places the binary in the Go binary directory. To see that path:
+
+```sh
+go env GOPATH
+```
+
+The binary will be at `$(go env GOPATH)/bin/scrubctl`. On most systems this is `~/go/bin/scrubctl`.
+
+**Add the Go binary directory to your PATH**
+
+If `~/go/bin` is not already on your `PATH`, add it:
+
+```sh
+export PATH="$PATH:$(go env GOPATH)/bin"
+```
+
+Add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent) to make it permanent, then reload:
+
+```sh
+source ~/.bashrc   # or source ~/.zshrc
+```
+
+**Verify**
+
+```sh
+scrubctl version
+```
+
+---
+
+### Method 3: Build from a local clone
+
+Use this method when developing or testing changes from a cloned copy of the repository.
+
+**Option A — Build into `./bin/` (run from the repo directory)**
+
+```sh
+make build
+```
+
+The binary is placed at `./bin/scrubctl` inside the repository. Run it directly from that path:
+
+```sh
+./bin/scrubctl version
+```
+
+To run it from any directory without a path prefix, copy it somewhere on your `PATH`:
+
+```sh
+sudo cp ./bin/scrubctl /usr/local/bin/
+```
+
+**Option B — Install into your Go binary directory**
+
+```sh
+make install
+```
+
+This is equivalent to `go install ./cmd/scrubctl`. The binary is placed in `$(go env GOPATH)/bin/scrubctl` (typically `~/go/bin/scrubctl`). See Method 2 above for `PATH` setup instructions.
+
+**Verify**
+
+```sh
+scrubctl version
+```
+
+---
+
+### First-run check
+
+Once `scrubctl` is on your `PATH`, confirm it is working:
+
+```sh
+scrubctl version
+scrubctl --help
+```
+
+`scrubctl version` prints the version, commit, and build date. `scrubctl --help` lists all available subcommands and global flags.
 
 ## Usage
 
@@ -168,9 +312,9 @@ Use `-n` or `--namespace` to target a namespace directly when running `scan` or 
 
 Use the CLI-only Make targets from the repo root:
 
-```sh
-make build
-make test
-make fixtures
-make install
-```
+| Target | What it does |
+|--------|-------------|
+| `make build` | Compiles `scrubctl` to `./bin/scrubctl` |
+| `make install` | Installs `scrubctl` to `$(go env GOPATH)/bin` |
+| `make test` | Runs Go unit tests and TypeScript fixture parity tests |
+| `make fixtures` | Regenerates TypeScript fixture expectations |
