@@ -1,120 +1,233 @@
 ---
 title: Manifest Parsing and Pruning
 description: >-
-  How the GitOps Export plugin reads live objects, classifies them, and
-  removes cluster-generated noise before preview and export.
+  How GitOps Export reads live objects, classifies them, and removes
+  cluster-generated noise before preview and export.
 ---
 
 # Manifest Parsing and Pruning
 
-This document explains the internal behavior of GitOps Export at a practical level: how the plugin reads live objects from a namespace, decides whether each object should be included, and produces the sanitized YAML shown in the preview and export flows.
+This document explains the internal behavior of GitOps Export at a practical level. It covers how each tool reads live objects, decides whether each object should be included, and produces the sanitized YAML shown in the preview, ZIP export, and Argo CD Application generator.
 
-All of this logic runs in the user's browser. The main sources are `src/scan-utils.ts`, `src/export-archive.ts`, `src/gitops-definition-utils.ts`, and `src/hooks/useNamespaceScan.ts`.
+## Shared Implementation
+
+GitOps Export ships two tools that implement the same curated resource set, classification rules, and sanitization pipeline. The logic is implemented twice (once in TypeScript for the browser-based console plugin, and once in Go for the standalone `scrubctl` CLI), and a fixture-based parity test suite keeps the two implementations in step.
+
+| Behavior | TypeScript (console plugin, runs in browser) | Go (`scrubctl`, runs locally) |
+|----------|----------------------------------------------|-------------------------------|
+| Scan a namespace | `src/hooks/useNamespaceScan.ts`, `src/scan-utils.ts` | `internal/scan` |
+| Classify a resource | `src/scan-utils.ts` | `internal/classify` |
+| Sanitize a resource | `src/scan-utils.ts` | `internal/sanitize` |
+| Curated kind registry | `src/scan-utils.ts` (`RESOURCE_TYPE_OPTIONS`) | `internal/resources` |
+| OpenShift scaffolding detection | `src/scan-utils.ts` | `internal/openshift` |
+| Build ZIP archive | `src/export-archive.ts` | `internal/archive` |
+| Generate Argo CD Application | `src/gitops-definition-utils.ts` | `internal/argocd` |
+
+Whenever you change one implementation, run `make fixtures` and `make test` to confirm the other still matches.
 
 ## Scan Flow
 
-When the user clicks **Export**, the plugin does this:
+When a user clicks **Export** in the console plugin, or runs `scrubctl scan`/`scrubctl export`/`scrubctl generate argocd`, the tool does this:
 
-1. Lists each selected namespaced resource kind through the OpenShift console proxy with the current user's RBAC.
-2. Classifies each returned object as `include`, `cleanup`, `review`, or `exclude`.
+1. Lists each selected namespaced resource kind through the Kubernetes API, scoped to the caller's RBAC (the console proxy in the browser, or the active kubeconfig context for `scrubctl`).
+2. Classifies each returned object as `include`, `cleanup`, `review`, or `exclude` using the rules below.
 3. Deep-clones non-excluded objects and removes cluster-generated metadata, defaults, and runtime-only fields.
-4. Stores the sanitized object as the source for preview, ZIP export, and GitOps definition generation.
-5. Sorts the results, computes summary counts, and renders them in the UI.
+4. Stores the sanitized object as the source for every downstream output (YAML preview, ZIP export, generated Argo CD Application).
+5. Sorts the results, computes summary counts, and returns them to the caller.
 
-Kinds that return `401`, `403`, `404`, or `405` during listing are skipped quietly.
+Kinds that return `401`, `403`, `404`, or `405` during listing are skipped silently. Any other error surfaces to the user with the list error attached.
 
-## Classification Summary
+## Classification Rules
 
-Classification is intentionally conservative. The first matching rule wins.
+Classification is intentionally conservative and first-match wins. The rules are evaluated top to bottom.
 
-| Rule group | Result |
-|------|------|
-| GitOps Export control-plane objects, controller-owned objects, and OpenShift namespace scaffolding | `exclude` |
-| Runtime-generated or cluster-owned kinds such as `Pod`, `ReplicaSet`, `Endpoints`, `EndpointSlice`, `ControllerRevision`, `Event`, `Lease`, `TokenReview`, `SubjectAccessReview`, `Node`, and `PersistentVolume` | `exclude` |
-| Helm-managed resources (`app.kubernetes.io/managed-by=helm`) | `review` |
-| Sensitive or context-heavy resources such as `Secret`, `PodDisruptionBudget`, `ResourceQuota`, `LimitRange`, and `DeploymentConfig` | `review` |
-| Resources that usually need environment-specific cleanup such as `PersistentVolumeClaim`, `ImageStream`, `ImageStreamTag`, and `Service` of type `LoadBalancer` | `cleanup` |
-| Common declarative workload and config resources such as `Deployment`, `StatefulSet`, `DaemonSet`, `Job`, `CronJob`, `ConfigMap`, `Service`, `Route`, `BuildConfig`, `NetworkPolicy`, `Role`, `RoleBinding`, and `ServiceAccount` | `include` |
-| Unknown kinds with no explicit rule | `review` |
+| Order | Rule | Result |
+|-------|------|--------|
+| 1 | `apiVersion` starts with `gitops.stakkr.io/` (internal control-plane objects) | `exclude` |
+| 2 | `metadata.ownerReferences` is non-empty (controller-owned object) | `exclude` |
+| 3 | Label `app.kubernetes.io/managed-by=helm` | `review` |
+| 4 | OpenShift namespace scaffolding (see below) | `exclude` |
+| 5 | Runtime or cluster-owned kind: `Pod`, `ReplicaSet`, `EndpointSlice`, `Endpoints`, `Event`, `ControllerRevision`, `Lease`, `TokenReview`, `SubjectAccessReview`, `Node`, `PersistentVolume` | `exclude` |
+| 6 | Sensitive or context-heavy kind: `Secret`, `PodDisruptionBudget`, `ResourceQuota`, `LimitRange`, `DeploymentConfig` | `review` |
+| 7 | Environment-specific kind: `PersistentVolumeClaim`, `ImageStream`, `ImageStreamTag` | `cleanup` |
+| 8 | `Service` of type `LoadBalancer` | `cleanup` |
+| 9 | Other declarative workloads/config: `Deployment`, `StatefulSet`, `DaemonSet`, `Job`, `CronJob`, `Service` (non-LoadBalancer), `ConfigMap`, `ServiceAccount`, `Role`, `RoleBinding`, `NetworkPolicy`, `HorizontalPodAutoscaler`, `Route`, `BuildConfig` | `include` |
+| 10 | Unknown or unhandled kind | `review` |
 
 ### OpenShift Scaffolding That Is Excluded
 
-The plugin excludes namespace scaffolding that OpenShift injects automatically, including:
+OpenShift automatically injects a handful of namespace-level objects that should never be committed to Git. The tool excludes them by name.
 
-- ConfigMaps such as `kube-root-ca.crt`, `openshift-service-ca.crt`, and names containing `service-cabundle`, `trusted-cabundle`, or `ca-bundle`
-- ServiceAccounts such as `default`, `builder`, `deployer`, and `pipeline`
-- RoleBindings such as `system:deployers`, `system:image-builders`, `system:image-pullers`, `openshift-pipelines-edit`, and `pipelines-scc-rolebinding`
+| Kind | Exact names | Name substrings |
+|------|-------------|-----------------|
+| `ConfigMap` | `kube-root-ca.crt`, `openshift-service-ca.crt` | `service-cabundle`, `trusted-cabundle`, `ca-bundle` |
+| `ServiceAccount` | `default`, `builder`, `deployer`, `pipeline` | (none) |
+| `RoleBinding` | `system:deployers`, `system:image-builders`, `system:image-pullers`, `openshift-pipelines-edit`, `pipelines-scc-rolebinding` | (none) |
 
-## Sanitization Summary
+## Curated Resource Set
 
-For resources that are not excluded, the plugin produces a sanitized manifest with these broad rules:
+GitOps Export operates on a fixed list of 18 namespaced kinds. 14 are selected by default; 4 are opt-in. Kinds outside the curated set are rejected with `kind not in curated resource set`.
 
-- Remove server-assigned metadata such as `uid`, `resourceVersion`, `generation`, `creationTimestamp`, `managedFields`, and `selfLink`
-- Remove controller ownership and most system finalizers
-- Strip known noisy annotations such as `kubectl.kubernetes.io/last-applied-configuration`, `deployment.kubernetes.io/revision`, `openshift.io/generated-by`, `openshift.io/host.generated`, and several OpenShift or PV-related prefixes
-- Remove top-level runtime state such as `status`, `spec.nodeName`, and default scheduler references
-- Clean pod templates by removing defaulted pod spec values (`schedulerName: default-scheduler`, `dnsPolicy: ClusterFirst`, `restartPolicy: Always`, empty `securityContext`) and container termination-message defaults (`terminationMessagePath: /dev/termination-log`, `terminationMessagePolicy: File`)
-- Apply small kind-specific cleanup passes for resources such as `Deployment`, `Secret`, `PersistentVolumeClaim`, `Service`, and `ImageStream`
+| Kind | API group / version | Default? |
+|------|---------------------|----------|
+| Deployment | `apps/v1` | yes |
+| StatefulSet | `apps/v1` | yes |
+| DaemonSet | `apps/v1` | yes |
+| Job | `batch/v1` | yes |
+| CronJob | `batch/v1` | yes |
+| Service | `v1` | yes |
+| Route | `route.openshift.io/v1` | yes |
+| Secret | `v1` | yes |
+| ConfigMap | `v1` | yes |
+| PersistentVolumeClaim | `v1` | yes |
+| NetworkPolicy | `networking.k8s.io/v1` | yes |
+| HorizontalPodAutoscaler | `autoscaling/v2` | yes |
+| BuildConfig | `build.openshift.io/v1` | yes |
+| ImageStream | `image.openshift.io/v1` | yes |
+| ImageStreamTag | `image.openshift.io/v1` | no |
+| Role | `rbac.authorization.k8s.io/v1` | no |
+| RoleBinding | `rbac.authorization.k8s.io/v1` | no |
+| ServiceAccount | `v1` | no |
 
-The goal is not to perfectly normalize every Kubernetes object. The goal is to remove the common cluster-generated noise so the YAML looks closer to what a human would commit to Git.
+## Sanitization Pipeline
 
-## Important Kind-Specific Behavior
+Every non-excluded resource runs through the same pipeline. The order matters: each stage operates on the output of the previous one.
 
-### Secret handling
+### 1. Deep-clone
 
-Secrets follow the user-selected secret mode:
+The live object is deep-cloned before any mutation, so the caller's original data is never modified.
 
-- `redact`: keep keys but replace values with `<REDACTED>`
-- `omit`: skip the Secret entirely
-- `include`: keep the values as-is
+### 2. Metadata strip
 
-### Deployment cleanup
+These fields are removed from `metadata`:
 
-Deployments have a small default-pruning pass that removes values such as:
+- `uid`
+- `resourceVersion`
+- `generation`
+- `creationTimestamp`
+- `managedFields`
+- `selfLink`
+- `ownerReferences`
 
-- `progressDeadlineSeconds: 600`
-- `revisionHistoryLimit: 10`
-- `minReadySeconds: 0`
-- the default rolling-update strategy block
+### 3. Annotation prune
 
-### Service cleanup
+These annotations are removed by exact key:
 
-Services always drop cluster-assigned networking fields such as `clusterIP`, `clusterIPs`, `ipFamilies`, `ipFamilyPolicy`, and `internalTrafficPolicy`, plus `sessionAffinity` when it is the default value `None`. LoadBalancer services also drop common platform-specific service annotations (prefixes `service.beta.kubernetes.io/`, `service.kubernetes.io/`, and `metallb.universe.tf/`).
+- `kubectl.kubernetes.io/last-applied-configuration`
+- `deployment.kubernetes.io/revision`
+- `openshift.io/generated-by`
+- `openshift.io/host.generated`
 
-### ImageStream cleanup
+These annotation **prefixes** are stripped:
 
-ImageStreams always drop `spec.dockerImageRepository` because the cluster populates this from the registry.
+- `pv.kubernetes.io/`
+- `operator.openshift.io/`
+- `openshift.io/build.`
 
-### PersistentVolumeClaim cleanup
+If the `metadata.annotations` map becomes empty, it is deleted entirely.
 
-PersistentVolumeClaims always drop `spec.volumeName` because it is assigned by the cluster after binding.
+### 4. System finalizer prune
 
-## Preview, ZIP, and GitOps Output
+Finalizers whose keys start with any of these prefixes are removed:
 
-The same sanitized object feeds every downstream output:
+- `kubernetes.io/`
+- `openshift.io/`
+- `operator.openshift.io/`
 
-- the YAML preview in the console
-- the ZIP archive download
-- the generated Argo CD Application YAML
+If the `metadata.finalizers` list becomes empty, it is deleted entirely.
 
-Serialization uses `js-yaml` with original key order preserved and YAML anchors disabled.
+### 5. Top-level defaults strip
 
-The preview is capped at 16 KB. If the YAML is longer, the preview is truncated and ends with `# Preview truncated`. ZIP export and GitOps definition generation use the full sanitized content, not the truncated preview text.
+- `status` is deleted.
+- `spec.nodeName` is deleted.
+- `spec.schedulerName` is deleted if its value is `default-scheduler`.
 
-## Supported Kinds
+### 6. Pod-template defaults strip
 
-The plugin ships with a fixed list of namespaced kinds that the user can scan. The default selection focuses on common workloads and configuration resources, while additional kinds such as `Role`, `RoleBinding`, `ServiceAccount`, and `ImageStreamTag` are optional.
+For any kind that carries a pod template (`Deployment`, `StatefulSet`, `DaemonSet`, `Job`, `CronJob`, `DeploymentConfig`), the tool prunes the embedded `spec.template` (or `spec.jobTemplate.spec.template` for CronJobs):
 
-## Example
+- `metadata.creationTimestamp` removed
+- `spec.schedulerName` removed if `default-scheduler`
+- `spec.dnsPolicy` removed if `ClusterFirst`
+- `spec.restartPolicy` removed if `Always`
+- `spec.securityContext` removed if empty
+- For each container: `terminationMessagePath` removed if `/dev/termination-log`, `terminationMessagePolicy` removed if `File`
 
-A live Deployment often includes runtime metadata and defaulted values that are not useful in Git, for example:
+### 7. Kind-specific cleanup
 
-- metadata fields such as `uid`, `resourceVersion`, and `managedFields`
-- rollout annotations such as `deployment.kubernetes.io/revision`
-- top-level `status`
-- default pod-template fields such as `schedulerName`, `dnsPolicy`, and container termination-message settings
+| Kind | Rule |
+|------|------|
+| `Deployment` | Drop `spec.progressDeadlineSeconds=600`, `spec.revisionHistoryLimit=10`, `spec.minReadySeconds=0`, and the default rolling-update strategy (`maxSurge=25%` and `maxUnavailable=25%`) |
+| `Secret` | Redact `data` and `stringData` values with `<REDACTED>` unless secret handling is `include`. When secret handling is `omit`, the Secret is dropped earlier in the pipeline before sanitization and never appears in output |
+| `PersistentVolumeClaim` | Drop `spec.volumeName` (assigned by the cluster after binding) |
+| `Service` | Drop `spec.clusterIP`, `spec.clusterIPs`, `spec.ipFamilies`, `spec.ipFamilyPolicy`, `spec.internalTrafficPolicy`; drop `spec.sessionAffinity` when value is `None` |
+| `Service` (type `LoadBalancer`) | Additionally drop annotations with prefixes `service.beta.kubernetes.io/`, `service.kubernetes.io/`, `metallb.universe.tf/` |
+| `ImageStream` | Drop `spec.dockerImageRepository` (populated from the registry) |
 
-After sanitization, the preview/exported YAML keeps the declarative parts:
+### 8. Secret-handling filter
+
+Secrets follow the user-selected mode:
+
+- `redact` (default): keys kept, values replaced with `<REDACTED>`
+- `omit`: the Secret is removed from the scan result entirely and listed under "Skipped" in `WARNINGS.md`
+- `include`: values are kept as-is (the tool warns on stderr; the console plugin renders a banner)
+
+The goal of sanitization is not to perfectly normalize every Kubernetes object. It is to remove the common cluster-generated noise so the YAML looks closer to what a human would commit to Git.
+
+## Downstream Outputs
+
+The sanitized object is the single source for every output the tool produces.
+
+### YAML preview
+
+Serialization uses `js-yaml` (browser) or `sigs.k8s.io/yaml` (Go), both preserving key order and disabling YAML anchors.
+
+The preview is capped at **16 KiB** (`MaxPreviewBytes = 16 * 1024`). If the serialized YAML is longer, the tool truncates to the last newline that fits and appends:
+
+```
+# Preview truncated
+```
+
+ZIP export and Argo CD Application generation always use the full sanitized content, never the truncated preview text.
+
+### ZIP archive
+
+Archive name: `gitops-export-<namespace>-<timestamp>.zip` (the timestamp has dashes, colons, and fractional seconds removed).
+
+Layout:
+
+```
+gitops-export-<namespace>-<timestamp>.zip
+├── README.md            # scan summary, classification legend, and scrubctl byline
+├── WARNINGS.md          # present only when cleanup/review/skipped resources exist
+└── manifests/
+    ├── include/         # ready for Git
+    ├── cleanup/         # exported but contains environment-specific values
+    └── review/          # exported but needs a careful look
+```
+
+Each manifest file is named `<kind-kebab>-<name-sanitized>.yaml`. If two sanitized names would collide (rare; usually a cross-kind collision after normalization), the second file gets a numeric suffix (`-2`, `-3`, ...).
+
+`WARNINGS.md` groups issues into three sections: `cleanup` (classified as `cleanup`), `review` (classified as `review`), and `skipped` (Secrets omitted by the `omit` secret-handling mode, which carry the message `Secret omitted by current secret handling`).
+
+### Argo CD Application
+
+The generator produces a single `Application` YAML document using the scan's namespace and sanitized summary. See [CLI Reference]({{ '/cli.html' | relative_url }}#generate-an-argo-cd-application) for the example output and the [User Guide]({{ '/user-guide.html' | relative_url }}#argo-cd-application-defaults) for the pre-filled defaults.
+
+## Worked Example
+
+A live Deployment usually carries runtime metadata and defaulted values that are not useful in Git:
+
+- `metadata.uid`, `metadata.resourceVersion`, `metadata.managedFields`
+- `metadata.annotations."deployment.kubernetes.io/revision"`
+- `status`
+- `spec.template.spec.schedulerName: default-scheduler`
+- `spec.template.spec.dnsPolicy: ClusterFirst`
+- `spec.template.spec.containers[].terminationMessagePath: /dev/termination-log`
+- `spec.template.spec.containers[].terminationMessagePolicy: File`
+- `spec.progressDeadlineSeconds: 600`, `spec.revisionHistoryLimit: 10`
+
+After sanitization, the preview and exported YAML keep only the declarative parts:
 
 ```yaml
 apiVersion: apps/v1
@@ -140,3 +253,7 @@ spec:
           ports:
             - containerPort: 8080
 ```
+
+## Testing Parity
+
+Fixture-based parity tests in `testdata/fixtures` compare the Go and TypeScript outputs for the same inputs. The TypeScript implementation is the oracle: `make fixtures` regenerates the expected output from `src/scan-utils.ts` via `scripts/generate-fixtures.ts`. `make test` runs the Go parity test (which reads `testdata/fixtures/*`) alongside the TypeScript fixture tests. Any new classification rule, annotation/finalizer prune, or kind-specific cleanup must preserve parity across both implementations.

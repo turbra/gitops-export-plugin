@@ -68,7 +68,7 @@ The plugin uses a single verb for all scan operations:
 
 | Verb | Scope |
 |------|-------|
-| **list** | Namespaced -- in the target namespace only |
+| **list** | Namespaced: in the target namespace only |
 
 No `get`, `watch`, `create`, `update`, `patch`, or `delete` operations are performed. The plugin never modifies resources in the target namespace.
 
@@ -155,13 +155,13 @@ rules:
     verbs: ["list"]
 ```
 
-Bind this Role to the user or group with a RoleBinding in the target namespace. For users who only need a subset of resource kinds, remove the corresponding entries from the Role -- the plugin will skip any kind the user cannot list.
+Bind this Role to the user or group with a RoleBinding in the target namespace. For users who only need a subset of resource kinds, remove the corresponding entries from the Role; the plugin will skip any kind the user cannot list.
 
 On current plugin builds, `HorizontalPodAutoscaler` is queried as `autoscaling/v2`. Clusters that do not serve `autoscaling/v2` will have that kind skipped.
 
 ### OpenShift default roles
 
-Users with the built-in OpenShift roles already have some of the required permissions. The table below lists what each role **cannot** list -- any kind not listed here is covered.
+Users with the built-in OpenShift roles already have some of the required permissions. The table below lists what each role **cannot** list; any kind not listed here is covered.
 
 | OpenShift role | Kinds that cannot be listed | Notes |
 |----------------|---------------------------|-------|

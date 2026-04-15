@@ -6,7 +6,7 @@ description: >-
 
 # Getting Started
 
-This guide covers how to deploy the GitOps Export console plugin to an OpenShift cluster, how to use it, how to set up a local development environment, and how to remove the plugin.
+This guide has two parts. The first covers the console plugin: deploying it to an OpenShift cluster, using it, setting up a local development environment, and removing it. The second is a short standalone-CLI quickstart for `scrubctl`, which runs on its own and does not require the plugin. Skip to [Get started with `scrubctl`](#get-started-with-scrubctl) if you only need the CLI.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This guide covers how to deploy the GitOps Export console plugin to an OpenShift
 
 - **OpenShift 4.18 or later** with the console operator enabled (the default)
 - **`oc` CLI** authenticated to the target cluster
-- **`cluster-admin`** role, or permissions to create a Namespace, Deployment, Service, ConfigMap, ConsolePlugin, Job, ServiceAccount, ClusterRole, and ClusterRoleBinding (the install overlay includes a Job that patches `consoles.operator.openshift.io/cluster` using its own dedicated ClusterRole -- the installer does not need that permission directly). See the [RBAC Reference]({{ '/rbac-reference.html' | relative_url }}) for details.
+- **`cluster-admin`** role, or permissions to create a Namespace, Deployment, Service, ConfigMap, ConsolePlugin, Job, ServiceAccount, ClusterRole, and ClusterRoleBinding (the install overlay includes a Job that patches `consoles.operator.openshift.io/cluster` using its own dedicated ClusterRole; the installer does not need that permission directly). See the [RBAC Reference]({{ '/rbac-reference.html' | relative_url }}) for details.
 
 ### For building images
 
@@ -26,6 +26,11 @@ This guide covers how to deploy the GitOps Export console plugin to an OpenShift
 - **`yarn`** or **`npm`**
 - **`oc` CLI** authenticated to a cluster (the local console bridge connects to this cluster)
 - **`podman`** or **`docker`** (to run the local console bridge container)
+
+### For `scrubctl`
+
+- **Go 1.21+** (only if you are building from source; the release archive has no Go dependency)
+- **`kubectl`** or **`oc`** CLI with a working kubeconfig (only for the cluster-facing `scan`, `export`, and `generate argocd` subcommands; the `scrub` subcommand and stdin-pipe mode need no cluster access)
 
 ## Deploy the Console Plugin
 
@@ -167,16 +172,6 @@ When you add or change translated UI text, regenerate the English catalog before
 npm run i18n
 ```
 
-## scrubctl CLI
-
-`scrubctl` is a standalone CLI that does not require the console plugin. Install it from a release archive or with Go:
-
-```sh
-go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
-```
-
-See [CLI Reference]({{ '/cli.html' | relative_url }}) for commands, global flags, and usage examples.
-
 ## Remove the Plugin
 
 ```sh
@@ -186,3 +181,21 @@ oc delete -k manifests/overlays/install
 This removes all resources created by the install overlay, including the namespace, deployment, console plugin registration, and the patcher Job's RBAC resources.
 
 After deletion, refresh the OpenShift console. The **GitOps Export** tab will no longer appear.
+
+## Get started with `scrubctl`
+
+`scrubctl` is a standalone Go CLI that does not require the console plugin. For now, build it from source in a local clone. This is the fastest path today because tagged releases are not published yet; the release-archive flow will work once a `v*.*.*` tag ships.
+
+### Build from source
+
+Place the resulting binary on your `PATH` and verify it with `scrubctl version`:
+
+```sh
+go build -o scrubctl ./cmd/scrubctl
+sudo mv scrubctl /usr/local/bin/
+scrubctl version
+```
+
+### Learn the CLI
+
+See [CLI Reference]({{ '/cli.html' | relative_url }}) for the release-archive install path, `go install` notes, commands, global flags, and usage examples.

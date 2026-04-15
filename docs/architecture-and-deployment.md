@@ -6,11 +6,18 @@ description: >-
 
 # Architecture and Deployment
 
-GitOps Export runs as an OpenShift console plugin. It has no server-side controller, no CRDs, and no persistent storage. All scan logic runs in the user's browser.
+GitOps Export ships two independent tools that implement the same classification and sanitization behavior:
 
-## Runtime Components
+- **Console plugin (`gitops-export-console`)**: runs as an OpenShift console plugin. No server-side controller, no CRDs, no persistent storage. All plugin scan logic runs in the user's browser.
+- **`scrubctl` CLI**: runs as a local Go binary on the user's workstation or CI runner. No cluster-side installation required. Talks to the Kubernetes API directly using the active kubeconfig context.
 
-### Plugin backend (`gitops-export-console` namespace)
+Both tools follow the same curated resource set and classification rules, and are expected to produce equivalent sanitized YAML. The logic is implemented twice (TypeScript in the plugin, Go in `scrubctl`) and kept aligned by a fixture-based parity test suite rather than shared runtime code. See [Manifest Parsing and Pruning]({{ '/manifest-parsing-and-pruning.html' | relative_url }}#shared-implementation) for the parity map.
+
+## Console Plugin Architecture
+
+### Runtime Components
+
+#### Plugin backend (`gitops-export-console` namespace)
 
 The plugin backend is a static-file nginx server. It serves the compiled JavaScript bundle and related assets to the OpenShift console over TLS on port 9443.
 
@@ -21,7 +28,7 @@ The plugin backend is a static-file nginx server. It serves the compiled JavaScr
 | **ConfigMap** (`gitops-export-console`) | nginx configuration: TLS listener on 9443 with TLSv1.2/TLSv1.3, cert paths, and `html` root |
 | **ConsolePlugin** (`gitops-export-console`) | Registers the plugin with the OpenShift console operator, pointing to the Service |
 
-### Plugin registration (install overlay)
+#### Plugin registration (install overlay)
 
 The install overlay adds a one-time Job that patches `consoles.operator.openshift.io/cluster` to add `gitops-export-console` to the active plugin list.
 
@@ -34,11 +41,11 @@ The install overlay adds a one-time Job that patches `consoles.operator.openshif
 
 Because the Job name is fixed, a rapid re-apply can collide with a previous completed Job until its `ttlSecondsAfterFinished: 300` cleanup window expires. If `oc apply -k manifests/overlays/install` fails during an upgrade or image refresh, delete `job/gitops-export-console-install-patcher` in `gitops-export-console` and re-apply.
 
-### Plugin frontend (user's browser)
+#### Plugin frontend (user's browser)
 
-The scan logic -- classification, metadata stripping, YAML preview generation, ZIP archive generation, and Argo CD Application generation -- runs entirely in the browser. The plugin uses the OpenShift console SDK's `k8sList` function to query the Kubernetes API through the console's built-in proxy. No direct API calls leave the browser; the console proxy handles authentication and routing.
+The scan logic (classification, metadata stripping, YAML preview generation, ZIP archive generation, and Argo CD Application generation) runs entirely in the browser. The plugin uses the OpenShift console SDK's `k8sList` function to query the Kubernetes API through the console's built-in proxy. No direct API calls leave the browser; the console proxy handles authentication and routing.
 
-## Namespace Model
+### Namespace Model
 
 | Namespace | Role |
 |-----------|------|
@@ -47,7 +54,7 @@ The scan logic -- classification, metadata stripping, YAML preview generation, Z
 
 The plugin does not create, modify, or delete any resources in the target namespace. It only performs list operations.
 
-## Scan Flow
+### Scan Flow
 
 ```
 User opens GitOps Export tab on a namespace
@@ -81,7 +88,7 @@ Optional ZIP archive generated in the browser
 Optional Application YAML generated in the browser
 ```
 
-## Deployment Topology
+### Deployment Topology
 
 ```
 +-------------------------------------------+
@@ -113,11 +120,67 @@ Optional Application YAML generated in the browser
     Application YAML generated here
 ```
 
-## Security Model
+### Security Model
 
 - **RBAC-scoped**: The plugin lists resources using the current user's OpenShift session through the console proxy. If the user cannot list a resource kind in a namespace, the plugin will not see those resources. API errors with status codes 401, 403, 404, and 405 are silently skipped.
 - **No elevated privileges at runtime**: The plugin deployment runs as a non-root nginx process serving static files. It does not make any Kubernetes API calls itself.
 - **Elevated privileges at install time only**: The patcher Job requires `get`, `list`, `patch`, and `update` on `consoles.operator.openshift.io` to register the plugin. This Job runs once and is cleaned up after 300 seconds (`ttlSecondsAfterFinished`).
 - **TLS**: The nginx server uses TLS certificates generated by the OpenShift service-cert signer. Traffic between the console and the plugin backend is encrypted within the cluster.
-- **Secret handling**: Secrets are redacted by default. Even when the user selects "include", the secret values are only rendered in the browser -- they are never sent to the plugin backend or any external service.
+- **Secret handling**: Secrets are redacted by default. Even when the user selects "include", the secret values are only rendered in the browser; they are never sent to the plugin backend or any external service.
 - **Pod security**: The deployment uses `runAsNonRoot`, `seccompProfile: RuntimeDefault`, drops all capabilities, and disables privilege escalation.
+
+## `scrubctl` CLI Architecture
+
+`scrubctl` is a self-contained Go binary. It is not deployed to the cluster and has no server-side components.
+
+### Runtime Model
+
+- The binary runs on the user's workstation or CI runner.
+- Cluster-facing subcommands (`scan`, `export`, `generate argocd`) talk directly to the Kubernetes API using the active kubeconfig. The `--kubeconfig` and `--context` flags override the default resolution order.
+- The `scrub` subcommand and stdin-pipe mode operate entirely on local YAML. They require no cluster access, no kubeconfig, and no network.
+- No daemon, no persistent state, no writes to the target cluster.
+
+### Source Layout
+
+| Package | Role |
+|---------|------|
+| `cmd/scrubctl` | Cobra command wiring, stdin detection, flag parsing |
+| `internal/scan` | Namespace scan against the dynamic client; resolves the namespace from args, flags, or kubeconfig |
+| `internal/classify` | First-match classification rules |
+| `internal/sanitize` | Deep-clone, metadata/annotation/finalizer prune, kind-specific cleanup, secret-handling, YAML serialization with 16 KiB preview cap |
+| `internal/resources` | Curated resource-type registry (18 kinds, 14 default-selected, 4 opt-in) |
+| `internal/openshift` | Name-based exclusion of OpenShift namespace scaffolding (ConfigMap, ServiceAccount, RoleBinding) |
+| `internal/archive` | ZIP archive generation with `README.md`, optional `WARNINGS.md`, and classified `manifests/` tree |
+| `internal/argocd` | Argo CD Application YAML generation from scan results |
+| `internal/types` | Shared data structures (`NamespaceScan`, `ResourceObject`, classification constants) |
+
+This layout mirrors the TypeScript layout one-to-one; see the [Manifest Parsing and Pruning]({{ '/manifest-parsing-and-pruning.html' | relative_url }}#shared-implementation) map for the full parity table.
+
+### Topology
+
+```
++-- User workstation / CI runner -----------+
+|                                           |
+|  scrubctl binary                          |
+|    - parses flags + stdin                 |
+|    - loads kubeconfig                     |
+|    - dynamic client -> k8s API            |
+|    - classify + sanitize locally          |
+|    - writes ZIP / Application YAML        |
+|      to stdout or --output dir            |
+|                                           |
++-------------------------------------------+
+        |
+        v
+  Kubernetes / OpenShift API
+    list operations only, scoped to
+    the kubeconfig user's RBAC
+```
+
+### Security Model
+
+- **RBAC-scoped**: `scrubctl` uses the active kubeconfig and only performs `list` operations. Errors with status codes 401, 403, 404, and 405 are silently skipped per kind; any other error surfaces to the terminal.
+- **No writes**: The CLI never creates, patches, or deletes cluster resources. `generate argocd` emits YAML to stdout; it does not apply it.
+- **Secret handling**: Defaults to `redact`. The `--secret-handling=include` mode prints a warning to stderr, because Secret values appear in the output. The `omit` mode drops Secrets entirely and lists them under "Skipped" in `WARNINGS.md`.
+- **No telemetry, no network calls outside the Kubernetes API**.
+- **Binary provenance**: The `cli-release` GitHub Actions workflow is wired to build release artifacts when a `v*.*.*` tag is pushed; no tagged releases have been published yet. The supported local build path is `go build -o scrubctl ./cmd/scrubctl`.
