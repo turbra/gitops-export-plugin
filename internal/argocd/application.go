@@ -1,6 +1,7 @@
 package argocd
 
 import (
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -75,7 +76,24 @@ func SuggestedSourcePath(scan types.NamespaceScan) string {
 	if namespace == "" {
 		namespace = scan.Metadata.Namespace
 	}
-	return "gitops-export/" + namespace + "/manifests"
+	return "gitops-export/" + sanitizeNamespaceSegment(namespace) + "/manifests"
+}
+
+// sanitizeNamespaceSegment strips characters that are invalid in Kubernetes namespace
+// names (DNS label: lowercase alphanumeric and hyphens). This prevents path-traversal
+// patterns like "../" from appearing in generated source paths written into Argo CD YAML.
+func sanitizeNamespaceSegment(ns string) string {
+	var b strings.Builder
+	for _, r := range ns {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' {
+			b.WriteRune(r)
+		}
+	}
+	result := strings.Trim(b.String(), "-")
+	if result == "" {
+		return "namespace"
+	}
+	return result
 }
 
 func ValidateForm(form DefinitionFormData) ValidationErrors {
@@ -89,8 +107,11 @@ func ValidateForm(form DefinitionFormData) ValidationErrors {
 	if strings.TrimSpace(form.ArgoNamespace) == "" {
 		errors["argoNamespace"] = "Argo CD namespace is required"
 	}
-	if strings.TrimSpace(form.RepositoryURL) == "" {
+	repoURL := strings.TrimSpace(form.RepositoryURL)
+	if repoURL == "" {
 		errors["repositoryUrl"] = "Repository URL is required"
+	} else if !isValidRepoURL(repoURL) {
+		errors["repositoryUrl"] = "Repository URL must be a valid https://, http://, ssh://, git://, or git@ URL"
 	}
 	if strings.TrimSpace(form.Revision) == "" {
 		errors["revision"] = "Revision is required"
@@ -98,13 +119,42 @@ func ValidateForm(form DefinitionFormData) ValidationErrors {
 	if strings.TrimSpace(form.SourcePath) == "" {
 		errors["sourcePath"] = "Path is required"
 	}
-	if strings.TrimSpace(form.DestinationServer) == "" {
+	destServer := strings.TrimSpace(form.DestinationServer)
+	if destServer == "" {
 		errors["destinationServer"] = "Cluster URL is required"
+	} else if !isValidClusterURL(destServer) {
+		errors["destinationServer"] = "Cluster URL must be a valid https:// or http:// URL"
 	}
 	if strings.TrimSpace(form.DestinationNamespace) == "" {
 		errors["destinationNamespace"] = "Destination namespace is required"
 	}
 	return errors
+}
+
+// isValidRepoURL accepts https/http/ssh/git scheme URLs and SCP-style git@ addresses.
+func isValidRepoURL(raw string) bool {
+	// SCP-style: git@host:path (no scheme)
+	if strings.HasPrefix(raw, "git@") && strings.Contains(raw, ":") {
+		return true
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	switch u.Scheme {
+	case "https", "http", "ssh", "git":
+		return u.Host != ""
+	}
+	return false
+}
+
+// isValidClusterURL requires an http or https URL with a non-empty host.
+func isValidClusterURL(raw string) bool {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	return (u.Scheme == "https" || u.Scheme == "http") && u.Host != ""
 }
 
 func GenerateDefinition(form DefinitionFormData, scan types.NamespaceScan) (DefinitionResult, error) {

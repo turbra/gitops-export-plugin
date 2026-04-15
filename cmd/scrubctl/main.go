@@ -111,6 +111,9 @@ func newExportCommand(root *rootOptions) *cobra.Command {
 		Short: "Export a namespace scan as a ZIP archive",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if root.SecretHandling == "include" {
+				warnSecretsIncluded(cmd)
+			}
 			namespace, err := resolveNamespace(root, args)
 			if err != nil {
 				return err
@@ -268,7 +271,14 @@ func runNamespaceScan(ctx context.Context, root *rootOptions, namespace string) 
 	})
 }
 
+func warnSecretsIncluded(cmd *cobra.Command) {
+	fmt.Fprintln(cmd.ErrOrStderr(), "Warning: --secret-handling=include — Secret values will appear in output. Ensure output is not logged or stored in plaintext.")
+}
+
 func runScrub(cmd *cobra.Command, root *rootOptions, file string) error {
+	if root.SecretHandling == "include" {
+		warnSecretsIncluded(cmd)
+	}
 	resource, err := readResource(file, cmd.InOrStdin())
 	if err != nil {
 		return err
