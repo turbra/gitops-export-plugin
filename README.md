@@ -88,12 +88,22 @@ go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
 ```
 
 ```sh
-oc get deploy/green-cursor -o yaml | scrubctl
-kubectl get deploy/green-cursor -o yaml | scrubctl
+# Pipe a live resource directly
+oc get deploy/<name> -n <namespace> -o yaml | scrubctl
+kubectl get deploy/<name> -n <namespace> -o yaml | scrubctl
+
+# Scan and export a whole namespace
 scrubctl scan <namespace>
 scrubctl export <namespace> -o .
-scrubctl scrub -f resource.yaml
-scrubctl generate argocd <namespace> --repo-url ... --revision ... --path ...
+
+# Scrub a single resource file
+scrubctl scrub -f deployment.yaml
+
+# Generate an Argo CD Application manifest
+scrubctl generate argocd <namespace> \
+  --repo-url https://github.com/example/repo.git \
+  --revision main \
+  --path manifests/overlays/install
 ```
 
 When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resource directly.
