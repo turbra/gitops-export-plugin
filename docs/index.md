@@ -39,6 +39,10 @@ Use these pages in this order when you are orienting yourself:
     <h3>Argo CD Application</h3>
     <p>Generates a GitOps-ready Application definition from the latest sanitized export without creating cluster resources directly.</p>
   </div>
+  <div class="gxp-card">
+    <h3>scrubctl</h3>
+    <p>Runs the same curated scan, sanitization, ZIP export, and Application generation flow as a standalone CLI, with kubectl compatibility kept secondary.</p>
+  </div>
 </div>
 
 ## Screenshots

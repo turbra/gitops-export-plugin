@@ -13,6 +13,7 @@ An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift
 - Renders a sanitized YAML preview for each resource so you can see what a clean export would look like
 - Downloads a ZIP archive of the sanitized manifests directly from the browser
 - Generates Argo CD Application YAML from the latest sanitized export
+- Ships `scrubctl`, a Go-based standalone CLI for pipes, kubectl, and terminal-first workflows
 - Respects OpenShift RBAC: the plugin only shows resources the current user can list in that namespace
 - Offers three secret handling modes: **redact** (default), **omit**, or **include**
 
@@ -26,6 +27,7 @@ An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift
 |----------|----------|-------------|
 | [User Guide](./docs/user-guide.md) | New users | Install, use, and understand GitOps Export in one page |
 | [Getting Started](./docs/getting-started.md) | Operators and contributors | Full deployment reference, local development, and image builds |
+| [CLI](./docs/cli.md) | Operators, contributors, and pipeline users | Install and run `scrubctl` outside the OpenShift console |
 | [Architecture](./docs/architecture-and-deployment.md) | Operators and contributors | Runtime components, namespace model, scan flow, and security model |
 | [Manifest Parsing and Pruning](./docs/manifest-parsing-and-pruning.md) | Contributors and advanced users | How the plugin classifies resources, sanitizes metadata, and builds YAML previews from live objects |
 | [RBAC Reference](./docs/rbac-reference.md) | Operators and security teams | Permissions required to install, run, and use the plugin |
@@ -70,6 +72,34 @@ This creates the `gitops-export-console` namespace, deploys the plugin, and runs
 ```sh
 oc delete -k manifests/overlays/install
 ```
+
+## CLI
+
+The repository also ships `scrubctl` for offline, pipe-based, and pipeline workflows. Install it directly:
+
+```sh
+go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
+```
+
+or download a release archive and place `scrubctl` on your `PATH`.
+
+The primary command is standalone and pipe-friendly:
+
+```sh
+oc get deploy/green-cursor -o yaml | scrubctl
+kubectl get deploy/green-cursor -o yaml | scrubctl
+scrubctl scan <namespace>
+scrubctl export <namespace> -o .
+scrubctl generate argocd <namespace> --repo-url ... --revision ... --path ...
+```
+
+If you want kubectl plugin compatibility, install the secondary shim:
+
+```sh
+kubectl krew install scrubctl
+```
+
+See [docs/cli.md](./docs/cli.md) for the full command reference and release/install details.
 
 ## Building and Publishing the Plugin Image
 

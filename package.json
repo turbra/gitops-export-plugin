@@ -21,7 +21,9 @@
     "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" -c i18next-parser.config.js",
     "lint": "eslint src --fix",
     "lint:check": "eslint src",
-    "webpack": "node -r ts-node/register ./node_modules/.bin/webpack"
+    "webpack": "node -r ts-node/register ./node_modules/.bin/webpack",
+    "test:fixtures": "ts-node scripts/test-fixtures.ts",
+    "generate-fixtures": "ts-node scripts/generate-fixtures.ts"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
