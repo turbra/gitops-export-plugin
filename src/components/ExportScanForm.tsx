@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   Checkbox,
+  Content,
   Form,
   FormGroup,
   FormSelect,
@@ -96,9 +97,9 @@ export function ExportScanForm({
                   </Button>
                 </div>
               </div>
-              <p className="gitops-export-console__subtle">
+              <Content component="p" className="gitops-export-console__subtle">
                 {t('Only selected kinds are scanned and previewed in the result.')}
-              </p>
+              </Content>
               <div className="gitops-export-console__checkboxGrid" id="gitops-export-resource-kinds">
                 {RESOURCE_TYPE_OPTIONS.map((option) => (
                   <Checkbox

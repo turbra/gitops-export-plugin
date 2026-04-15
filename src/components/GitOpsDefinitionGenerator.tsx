@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   Checkbox,
+  Content,
   Form,
   FormGroup,
   Grid,
@@ -64,12 +65,12 @@ export function GitOpsDefinitionGenerator({
           <CardTitle>{definitionTitle}</CardTitle>
         </CardHeader>
         <CardBody>
-          <p className="gitops-export-console__subtle">
+          <Content component="p" className="gitops-export-console__subtle">
             {t('No GitOps definition is shown yet.')}
-          </p>
-          <p className="gitops-export-console__subtle">
+          </Content>
+          <Content component="p" className="gitops-export-console__subtle">
             {t('Run an export to generate an Argo CD Application YAML definition for this namespace.')}
-          </p>
+          </Content>
         </CardBody>
       </Card>
     );
@@ -444,22 +445,22 @@ export function GitOpsDefinitionGenerator({
                   </Alert>
                 ) : null}
 
-                <p className="gitops-export-console__subtle">
+                <Content component="p" className="gitops-export-console__subtle">
                   {generated
                     ? t('Application {{resourceName}} is ready for Git review.', {
                         resourceName: generated.resourceName,
                       })
                     : t('No GitOps definition has been generated yet.')}
-                </p>
+                </Content>
 
                 {generated ? (
                   <YamlPreview value={generated.yaml} />
                 ) : (
                   <div className="gitops-export-console__emptyReview">
-                    <h3>{t('Generate YAML to review the Application manifest')}</h3>
-                    <p className="gitops-export-console__subtle">
+                    <Content component="h3">{t('Generate YAML to review the Application manifest')}</Content>
+                    <Content component="p" className="gitops-export-console__subtle">
                       {t('The generated Application YAML will appear here after you run export and then generate the definition.')}
-                    </p>
+                    </Content>
                   </div>
                 )}
               </SectionCard>

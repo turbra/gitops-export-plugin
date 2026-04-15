@@ -6,6 +6,7 @@ import {
   PageSection,
 } from '@patternfly/react-core';
 import {
+  DocumentTitle,
   ListPageHeader,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { useTranslation } from 'react-i18next';
@@ -45,10 +46,6 @@ export default function GitOpsExportPage({ obj }: GitOpsExportPageProps) {
   }, [namespace]);
 
   React.useEffect(() => {
-    document.title = t('GitOps Export UI');
-  }, [t]);
-
-  React.useEffect(() => {
     if (!scan) {
       setExpandedScan('');
       setExpandedPreview('');
@@ -83,6 +80,7 @@ export default function GitOpsExportPage({ obj }: GitOpsExportPageProps) {
 
   return (
     <>
+      <DocumentTitle>{t('GitOps Export UI')}</DocumentTitle>
       <ListPageHeader
         title={
           namespace
