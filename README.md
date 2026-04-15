@@ -135,7 +135,7 @@ Use `hack/version.sh` (shell) or the `version.ts` module (webpack build) to comp
 
 ## scrubctl CLI
 
-`scrubctl` is a standalone Go CLI for namespace export without the OpenShift console. Use it in CI pipelines, with `kubectl` on non-OpenShift clusters, or anywhere you prefer a terminal workflow over a browser UI.
+`scrubctl` is a standalone Go CLI that scans a namespace, classifies resources, sanitizes live manifests, and exports GitOps-ready artifacts for Kubernetes and OpenShift through a terminal workflow that is not available natively in the web console.
 
 Install from a release archive or directly:
 
