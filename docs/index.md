@@ -41,12 +41,6 @@ Use these pages in this order when you are orienting yourself:
   </div>
 </div>
 
-## scrubctl CLI
-
-`scrubctl` is a standalone Go CLI that runs namespace scan, classification, sanitization, ZIP export, and Argo CD Application generation without the OpenShift console. It works wherever `kubectl` or `oc` works — in CI pipelines, against non-OpenShift clusters, or anywhere you prefer a terminal workflow.
-
-- <a href="{{ '/cli.html' | relative_url }}"><kbd>CLI REFERENCE</kbd></a> for install, commands, and global flags
-
 ## Screenshots
 
 <div class="gxp-screenshot-grid">
@@ -65,6 +59,12 @@ Use these pages in this order when you are orienting yourself:
     </div>
   </a>
 </div>
+
+## scrubctl CLI
+
+`scrubctl` is a standalone Go CLI that runs namespace scan, classification, sanitization, ZIP export, and Argo CD Application generation without the OpenShift console. It works wherever `kubectl` or `oc` works — in CI pipelines, against non-OpenShift clusters, or anywhere you prefer a terminal workflow.
+
+- <a href="{{ '/cli.html' | relative_url }}"><kbd>CLI REFERENCE</kbd></a> for install, commands, and global flags
 
 ## Current Operating Model
 
