@@ -77,39 +77,6 @@ This creates the `gitops-export-console` namespace, deploys the plugin, and runs
 oc delete -k manifests/overlays/install
 ```
 
-## scrubctl CLI
-
-`scrubctl` is a standalone Go CLI for namespace export without the OpenShift console. Use it in CI pipelines, with `kubectl` on non-OpenShift clusters, or anywhere you prefer a terminal workflow over a browser UI.
-
-Install from a release archive or directly:
-
-```sh
-go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
-```
-
-```sh
-# Pipe a live resource directly
-oc get deploy/<name> -n <namespace> -o yaml | scrubctl
-kubectl get deploy/<name> -n <namespace> -o yaml | scrubctl
-
-# Scan and export a whole namespace
-scrubctl scan <namespace>
-scrubctl export <namespace> -o .
-
-# Scrub a single resource file
-scrubctl scrub -f deployment.yaml
-
-# Generate an Argo CD Application manifest
-scrubctl generate argocd <namespace> \
-  --repo-url https://github.com/example/repo.git \
-  --revision main \
-  --path manifests/overlays/install
-```
-
-When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resource directly.
-
-See [docs/cli.md](./docs/cli.md) for the full command reference, global flags, and release downloads.
-
 ## Building and Publishing the Plugin Image
 
 ```sh
@@ -165,6 +132,39 @@ Release versions are derived from git tags. Create tags in `vX.Y.Z` format.
 | No release tags exist | `0.0.0-dev+<sha>` |
 
 Use `hack/version.sh` (shell) or the `version.ts` module (webpack build) to compute the version from a checkout.
+
+## scrubctl CLI
+
+`scrubctl` is a standalone Go CLI for namespace export without the OpenShift console. Use it in CI pipelines, with `kubectl` on non-OpenShift clusters, or anywhere you prefer a terminal workflow over a browser UI.
+
+Install from a release archive or directly:
+
+```sh
+go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
+```
+
+```sh
+# Pipe a live resource directly
+oc get deploy/<name> -n <namespace> -o yaml | scrubctl
+kubectl get deploy/<name> -n <namespace> -o yaml | scrubctl
+
+# Scan and export a whole namespace
+scrubctl scan <namespace>
+scrubctl export <namespace> -o .
+
+# Scrub a single resource file
+scrubctl scrub -f deployment.yaml
+
+# Generate an Argo CD Application manifest
+scrubctl generate argocd <namespace> \
+  --repo-url https://github.com/example/repo.git \
+  --revision main \
+  --path manifests/overlays/install
+```
+
+When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resource directly.
+
+See [docs/cli.md](./docs/cli.md) for the full command reference, global flags, and release downloads.
 
 ## License
 
