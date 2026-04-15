@@ -93,12 +93,6 @@ scrubctl export <namespace> -o .
 scrubctl generate argocd <namespace> --repo-url ... --revision ... --path ...
 ```
 
-If you want kubectl plugin compatibility, install the secondary shim:
-
-```sh
-kubectl krew install scrubctl
-```
-
 See [docs/cli.md](./docs/cli.md) for the full command reference and release/install details.
 
 ## Building and Publishing the Plugin Image

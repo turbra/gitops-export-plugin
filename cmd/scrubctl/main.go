@@ -58,7 +58,7 @@ func newRootCommand() *cobra.Command {
 				return cmd.Help()
 			}
 			if stdinHasData(cmd.InOrStdin()) {
-				return runSanitize(cmd, opts, "")
+				return runScrub(cmd, opts, "")
 			}
 			return cmd.Help()
 		},
@@ -77,7 +77,7 @@ func newRootCommand() *cobra.Command {
 	cmd.AddCommand(
 		newScanCommand(opts),
 		newExportCommand(opts),
-		newSanitizeCommand(opts),
+		newScrubCommand(opts),
 		newGenerateCommand(opts),
 		newVersionCommand(),
 	)
@@ -137,13 +137,13 @@ func newExportCommand(root *rootOptions) *cobra.Command {
 	return cmd
 }
 
-func newSanitizeCommand(root *rootOptions) *cobra.Command {
+func newScrubCommand(root *rootOptions) *cobra.Command {
 	var file string
 	cmd := &cobra.Command{
-		Use:   "sanitize",
-		Short: "Sanitize a single YAML resource from file or stdin",
+		Use:   "scrub",
+		Short: "Scrub a single YAML resource from file or stdin",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSanitize(cmd, root, file)
+			return runScrub(cmd, root, file)
 		},
 	}
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to the input resource YAML file")
@@ -267,7 +267,7 @@ func runNamespaceScan(ctx context.Context, root *rootOptions, namespace string) 
 	})
 }
 
-func runSanitize(cmd *cobra.Command, root *rootOptions, file string) error {
+func runScrub(cmd *cobra.Command, root *rootOptions, file string) error {
 	resource, err := readResource(file, cmd.InOrStdin())
 	if err != nil {
 		return err

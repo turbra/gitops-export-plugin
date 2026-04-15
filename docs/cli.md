@@ -20,14 +20,6 @@ Download a release archive from GitHub Releases and place `scrubctl` on your `PA
 go install github.com/turbra/gitops-export-plugin/cmd/scrubctl@latest
 ```
 
-### Krew compatibility
-
-```sh
-kubectl krew install scrubctl
-```
-
-This installs a kubectl-plugin shim so you can run `kubectl scrubctl ...`, but the primary standalone command remains `scrubctl`.
-
 ## Commands
 
 ```sh
@@ -35,13 +27,13 @@ oc get deploy/green-cursor -o yaml | scrubctl
 kubectl get deploy/green-cursor -o yaml | scrubctl
 scrubctl scan <namespace>
 scrubctl export <namespace> -o <dir>
-scrubctl sanitize -f resource.yaml
-scrubctl sanitize < resource.yaml
+scrubctl scrub -f resource.yaml
+scrubctl scrub < resource.yaml
 scrubctl generate argocd <namespace> --repo-url ... --revision ... --path ...
 scrubctl version
 ```
 
-When invoked with no subcommand and YAML on stdin, `scrubctl` sanitizes the resource directly. That keeps pipe-based use natural.
+When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resource directly. That keeps pipe-based use natural.
 
 ## Global flags
 
@@ -67,13 +59,14 @@ Kinds outside that set are excluded with `kind not in curated resource set`.
 
 ## OpenShift and oc
 
-If you want kubectl plugin compatibility, install the secondary shim through Krew:
+`scrubctl` works naturally alongside `oc`. Pipe any resource fetched with `oc get` directly into `scrubctl`:
 
 ```sh
-kubectl scrubctl scan demo
+oc get deploy/green-cursor -o yaml | scrubctl
+oc get route/my-route -n demo -o yaml | scrubctl
 ```
 
-The plugin shim is secondary. `scrubctl` is the primary user-facing command.
+Use `-n` or `--namespace` to target a namespace directly when running `scan` or `export` against an OpenShift cluster with an active `oc` session. OpenShift resource kinds (Route, BuildConfig, ImageStream, ImageStreamTag) are first-class and handled identically to standard Kubernetes kinds.
 
 ## Local development
 
