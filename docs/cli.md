@@ -10,6 +10,19 @@ description: >-
 
 The cluster-facing subcommands (`scan`, `export`, `generate argocd`) read your active kubeconfig the same way `kubectl` or `oc` do. The `scrub` subcommand and stdin pipe mode work on local YAML only, so they need no cluster access and no kubeconfig.
 
+## Demo
+
+<div id="demo-player"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    AsciinemaPlayer.create(
+      '{{ "/demo-scrubctl.cast" | relative_url }}',
+      document.getElementById('demo-player'),
+      { cols: 120, rows: 36, idleTimeLimit: 3, speed: 1.5, theme: 'asciinema', fit: 'width' }
+    );
+  });
+</script>
+
 ## Install
 
 Three steps, every time:

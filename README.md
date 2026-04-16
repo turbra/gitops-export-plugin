@@ -168,6 +168,8 @@ When invoked with no subcommand and YAML on stdin, `scrubctl` scrubs the resourc
 
 See [docs/cli.md](./docs/cli.md) for the release-archive install path, `go install` notes, and the full command reference.
 
+Watch the [scrubctl demo](https://turbra.github.io/gitops-export-plugin/cli.html#demo) on the project site to see the CLI in action.
+
 ## License
 
 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
