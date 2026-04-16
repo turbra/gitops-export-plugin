@@ -11,19 +11,19 @@ This document explains the internal behavior of GitOps Export at a practical lev
 
 ## Shared Implementation
 
-GitOps Export ships two tools that implement the same curated resource set, classification rules, and sanitization pipeline. The logic is implemented twice (once in TypeScript for the browser-based console plugin, and once in Go for the standalone `scrubctl` CLI), and a fixture-based parity test suite keeps the two implementations in step.
+GitOps Export ships two tools that implement the same curated resource set, classification rules, and sanitization pipeline. The logic is implemented twice (once in TypeScript for the browser-based console plugin, and once in Go for the standalone [`scrubctl` CLI](https://github.com/turbra/scrubctl)), and a fixture-based parity test suite keeps the two implementations in step.
 
-| Behavior | TypeScript (console plugin, runs in browser) | Go (`scrubctl`, runs locally) |
+| Behavior | TypeScript (console plugin, runs in browser) | Go ([`scrubctl`](https://github.com/turbra/scrubctl), runs locally) |
 |----------|----------------------------------------------|-------------------------------|
-| Scan a namespace | `src/hooks/useNamespaceScan.ts`, `src/scan-utils.ts` | `internal/scan` |
-| Classify a resource | `src/scan-utils.ts` | `internal/classify` |
-| Sanitize a resource | `src/scan-utils.ts` | `internal/sanitize` |
-| Curated kind registry | `src/scan-utils.ts` (`RESOURCE_TYPE_OPTIONS`) | `internal/resources` |
-| OpenShift scaffolding detection | `src/scan-utils.ts` | `internal/openshift` |
-| Build ZIP archive | `src/export-archive.ts` | `internal/archive` |
-| Generate Argo CD Application | `src/gitops-definition-utils.ts` | `internal/argocd` |
+| Scan a namespace | `src/hooks/useNamespaceScan.ts`, `src/scan-utils.ts` | [`internal/scan`](https://github.com/turbra/scrubctl/tree/main/internal/scan) |
+| Classify a resource | `src/scan-utils.ts` | [`internal/classify`](https://github.com/turbra/scrubctl/tree/main/internal/classify) |
+| Sanitize a resource | `src/scan-utils.ts` | [`internal/sanitize`](https://github.com/turbra/scrubctl/tree/main/internal/sanitize) |
+| Curated kind registry | `src/scan-utils.ts` (`RESOURCE_TYPE_OPTIONS`) | [`internal/resources`](https://github.com/turbra/scrubctl/tree/main/internal/resources) |
+| OpenShift scaffolding detection | `src/scan-utils.ts` | [`internal/openshift`](https://github.com/turbra/scrubctl/tree/main/internal/openshift) |
+| Build ZIP archive | `src/export-archive.ts` | [`internal/archive`](https://github.com/turbra/scrubctl/tree/main/internal/archive) |
+| Generate Argo CD Application | `src/gitops-definition-utils.ts` | [`internal/argocd`](https://github.com/turbra/scrubctl/tree/main/internal/argocd) |
 
-Whenever you change one implementation, run `make fixtures` and `make test` to confirm the other still matches.
+Whenever you change the TypeScript implementation, run `npm run generate-fixtures` and `npm run test:fixtures` to update and verify the golden files. Then copy the updated `testdata/fixtures/` to the scrubctl repo and run `go test ./...` there to confirm parity.
 
 ## Scan Flow
 
@@ -212,7 +212,7 @@ Each manifest file is named `<kind-kebab>-<name-sanitized>.yaml`. If two sanitiz
 
 ### Argo CD Application
 
-The generator produces a single `Application` YAML document using the scan's namespace and sanitized summary. See [CLI Reference]({{ '/cli.html' | relative_url }}#generate-an-argo-cd-application) for the example output and the [User Guide]({{ '/user-guide.html' | relative_url }}#argo-cd-application-defaults) for the pre-filled defaults.
+The generator produces a single `Application` YAML document using the scan's namespace and sanitized summary. See the [scrubctl CLI Reference](https://turbra.github.io/scrubctl/cli.html#generate-an-argo-cd-application) for the example output and the [User Guide]({{ '/user-guide.html' | relative_url }}#argo-cd-application-defaults) for the pre-filled defaults.
 
 ## Worked Example
 
@@ -256,4 +256,6 @@ spec:
 
 ## Testing Parity
 
-Fixture-based parity tests in `testdata/fixtures` compare the Go and TypeScript outputs for the same inputs. The TypeScript implementation is the oracle: `make fixtures` regenerates the expected output from `src/scan-utils.ts` via `scripts/generate-fixtures.ts`. `make test` runs the Go parity test (which reads `testdata/fixtures/*`) alongside the TypeScript fixture tests. Any new classification rule, annotation/finalizer prune, or kind-specific cleanup must preserve parity across both implementations.
+Fixture-based parity tests in `testdata/fixtures` compare the Go and TypeScript outputs for the same inputs. The TypeScript implementation is the oracle: `npm run generate-fixtures` regenerates the expected output from `src/scan-utils.ts` via `scripts/generate-fixtures.ts`. `npm run test:fixtures` validates the TypeScript output against the golden files.
+
+The Go parity tests live in the [scrubctl repository](https://github.com/turbra/scrubctl) and read the same `testdata/fixtures/` directory. After updating fixtures here, copy them to the scrubctl repo and run `go test ./...` to confirm both implementations still match. Any new classification rule, annotation/finalizer prune, or kind-specific cleanup must preserve parity across both implementations.

@@ -6,7 +6,7 @@ description: >-
 
 # Getting Started
 
-This guide has two parts. The first covers the console plugin: deploying it to an OpenShift cluster, using it, setting up a local development environment, and removing it. The second is a short standalone-CLI quickstart for `scrubctl`, which runs on its own and does not require the plugin. Skip to [Get started with `scrubctl`](#get-started-with-scrubctl) if you only need the CLI.
+This guide covers the console plugin: deploying it to an OpenShift cluster, using it, setting up a local development environment, and removing it. For the standalone `scrubctl` CLI, see the [scrubctl repository](https://github.com/turbra/scrubctl).
 
 ## Prerequisites
 
@@ -26,11 +26,6 @@ This guide has two parts. The first covers the console plugin: deploying it to a
 - **`yarn`** or **`npm`**
 - **`oc` CLI** authenticated to a cluster (the local console bridge connects to this cluster)
 - **`podman`** or **`docker`** (to run the local console bridge container)
-
-### For `scrubctl`
-
-- **Go 1.21+** (only if you are building from source; the release archive has no Go dependency)
-- **`kubectl`** or **`oc`** CLI with a working kubeconfig (only for the cluster-facing `scan`, `export`, and `generate argocd` subcommands; the `scrub` subcommand and stdin-pipe mode need no cluster access)
 
 ## Deploy the Console Plugin
 
@@ -182,20 +177,10 @@ This removes all resources created by the install overlay, including the namespa
 
 After deletion, refresh the OpenShift console. The **GitOps Export** tab will no longer appear.
 
-## Get started with `scrubctl`
+## scrubctl CLI
 
-`scrubctl` is a standalone Go CLI that does not require the console plugin. For now, build it from source in a local clone. This is the fastest path today because tagged releases are not published yet; the release-archive flow will work once a `v*.*.*` tag ships.
+The standalone `scrubctl` CLI has moved to its own repository: **[github.com/turbra/scrubctl](https://github.com/turbra/scrubctl)**
 
-### Build from source
+Install: `go install github.com/turbra/scrubctl/cmd/scrubctl@latest`
 
-Place the resulting binary on your `PATH` and verify it with `scrubctl version`:
-
-```sh
-go build -o scrubctl ./cmd/scrubctl
-sudo mv scrubctl /usr/local/bin/
-scrubctl version
-```
-
-### Learn the CLI
-
-See [CLI Reference]({{ '/cli.html' | relative_url }}) for the release-archive install path, `go install` notes, commands, global flags, and usage examples.
+See the [scrubctl command reference](https://turbra.github.io/scrubctl/cli.html) for install options, commands, and usage examples.

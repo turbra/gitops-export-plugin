@@ -153,9 +153,9 @@ Argo CD will now sync the exported manifests from Git to the destination namespa
 
 ## Prefer a terminal or pipeline?
 
-`scrubctl` is a standalone CLI that runs the same scan, classification, sanitization, and export flow without the OpenShift console. Use it to pipe resources directly, run scans in CI, or work on clusters where you have no console access.
+The standalone `scrubctl` CLI runs the same scan, classification, sanitization, and export flow without the OpenShift console. It has moved to its own repository: **[github.com/turbra/scrubctl](https://github.com/turbra/scrubctl)**
 
-See [CLI Reference]({{ '/cli.html' | relative_url }}) for install instructions and the full command reference.
+See the [scrubctl command reference](https://turbra.github.io/scrubctl/cli.html) for install instructions and full usage.
 
 ## How it works (briefly)
 

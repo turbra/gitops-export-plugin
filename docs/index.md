@@ -1,7 +1,7 @@
 ---
 title: GitOps Export
 description: >-
-  Documentation home for the GitOps Export console plugin and scrubctl CLI.
+  Documentation home for the GitOps Export console plugin.
 ---
 
 <div class="gxp-badge-row">
@@ -62,9 +62,10 @@ Use these pages in this order when you are orienting yourself:
 
 ## scrubctl CLI
 
-`scrubctl` is a standalone Go CLI that runs namespace scan, classification, sanitization, ZIP export, and Argo CD Application generation without the OpenShift console. It works wherever `kubectl` or `oc` works — in CI pipelines, against non-OpenShift clusters, or anywhere you prefer a terminal workflow.
+The standalone `scrubctl` CLI has moved to its own repository.
 
-- <a href="{{ '/cli.html' | relative_url }}"><kbd>CLI REFERENCE</kbd></a> for install, commands, and global flags
+- <a href="https://github.com/turbra/scrubctl"><kbd>SCRUBCTL REPOSITORY</kbd></a>
+- <a href="https://turbra.github.io/scrubctl/cli.html"><kbd>CLI REFERENCE</kbd></a>
 
 ## Current Operating Model
 

@@ -9,7 +9,7 @@ description: >-
 GitOps Export ships two independent tools that implement the same classification and sanitization behavior:
 
 - **Console plugin (`gitops-export-console`)**: runs as an OpenShift console plugin. No server-side controller, no CRDs, no persistent storage. All plugin scan logic runs in the user's browser.
-- **`scrubctl` CLI**: runs as a local Go binary on the user's workstation or CI runner. No cluster-side installation required. Talks to the Kubernetes API directly using the active kubeconfig context.
+- **[`scrubctl` CLI](https://github.com/turbra/scrubctl)**: runs as a local Go binary on the user's workstation or CI runner. No cluster-side installation required. Now maintained in its own repository.
 
 Both tools follow the same curated resource set and classification rules, and are expected to produce equivalent sanitized YAML. The logic is implemented twice (TypeScript in the plugin, Go in `scrubctl`) and kept aligned by a fixture-based parity test suite rather than shared runtime code. See [Manifest Parsing and Pruning]({{ '/manifest-parsing-and-pruning.html' | relative_url }}#shared-implementation) for the parity map.
 
@@ -131,56 +131,6 @@ Optional Application YAML generated in the browser
 
 ## `scrubctl` CLI Architecture
 
-`scrubctl` is a self-contained Go binary. It is not deployed to the cluster and has no server-side components.
+The `scrubctl` CLI has moved to its own repository: **[github.com/turbra/scrubctl](https://github.com/turbra/scrubctl)**
 
-### Runtime Model
-
-- The binary runs on the user's workstation or CI runner.
-- Cluster-facing subcommands (`scan`, `export`, `generate argocd`) talk directly to the Kubernetes API using the active kubeconfig. The `--kubeconfig` and `--context` flags override the default resolution order.
-- The `scrub` subcommand and stdin-pipe mode operate entirely on local YAML. They require no cluster access, no kubeconfig, and no network.
-- No daemon, no persistent state, no writes to the target cluster.
-
-### Source Layout
-
-| Package | Role |
-|---------|------|
-| `cmd/scrubctl` | Cobra command wiring, stdin detection, flag parsing |
-| `internal/scan` | Namespace scan against the dynamic client; resolves the namespace from args, flags, or kubeconfig |
-| `internal/classify` | First-match classification rules |
-| `internal/sanitize` | Deep-clone, metadata/annotation/finalizer prune, kind-specific cleanup, secret-handling, YAML serialization with 16 KiB preview cap |
-| `internal/resources` | Curated resource-type registry (18 kinds, 14 default-selected, 4 opt-in) |
-| `internal/openshift` | Name-based exclusion of OpenShift namespace scaffolding (ConfigMap, ServiceAccount, RoleBinding) |
-| `internal/archive` | ZIP archive generation with `README.md`, optional `WARNINGS.md`, and classified `manifests/` tree |
-| `internal/argocd` | Argo CD Application YAML generation from scan results |
-| `internal/types` | Shared data structures (`NamespaceScan`, `ResourceObject`, classification constants) |
-
-This layout mirrors the TypeScript layout one-to-one; see the [Manifest Parsing and Pruning]({{ '/manifest-parsing-and-pruning.html' | relative_url }}#shared-implementation) map for the full parity table.
-
-### Topology
-
-```
-+-- User workstation / CI runner -----------+
-|                                           |
-|  scrubctl binary                          |
-|    - parses flags + stdin                 |
-|    - loads kubeconfig                     |
-|    - dynamic client -> k8s API            |
-|    - classify + sanitize locally          |
-|    - writes ZIP / Application YAML        |
-|      to stdout or --output dir            |
-|                                           |
-+-------------------------------------------+
-        |
-        v
-  Kubernetes / OpenShift API
-    list operations only, scoped to
-    the kubeconfig user's RBAC
-```
-
-### Security Model
-
-- **RBAC-scoped**: `scrubctl` uses the active kubeconfig and only performs `list` operations. Errors with status codes 401, 403, 404, and 405 are silently skipped per kind; any other error surfaces to the terminal.
-- **No writes**: The CLI never creates, patches, or deletes cluster resources. `generate argocd` emits YAML to stdout; it does not apply it.
-- **Secret handling**: Defaults to `redact`. The `--secret-handling=include` mode prints a warning to stderr, because Secret values appear in the output. The `omit` mode drops Secrets entirely and lists them under "Skipped" in `WARNINGS.md`.
-- **No telemetry, no network calls outside the Kubernetes API**.
-- **Binary provenance**: The `cli-release` GitHub Actions workflow is wired to build release artifacts when a `v*.*.*` tag is pushed; no tagged releases have been published yet. The supported local build path is `go build -o scrubctl ./cmd/scrubctl`.
+See the [scrubctl documentation](https://turbra.github.io/scrubctl/) for architecture details, source layout, security model, and the full command reference.

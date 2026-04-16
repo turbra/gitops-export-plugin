@@ -16,8 +16,8 @@ The docs are separated on purpose:
 
 - read the user guide when you want the shortest path from plugin install to
   GitOps-ready output
-- read the CLI reference when you want to use `scrubctl` from a terminal,
-  pipeline, or without the OpenShift console
+- read the [scrubctl CLI reference](https://turbra.github.io/scrubctl/cli.html) when you want to use `scrubctl` from a terminal,
+  pipeline, or without the OpenShift console (now in its own repository)
 - read the getting-started guide when you are operating the deployment, building
   images, or re-applying the install overlay
 - read architecture and parsing pages when you need to understand how the plugin
@@ -37,7 +37,7 @@ pages from drifting into operator instructions.
 
 ### I want to use scrubctl in a terminal or CI pipeline
 
-1. <a href="{{ '/cli.html' | relative_url }}"><kbd>CLI REFERENCE</kbd></a>
+1. <a href="https://turbra.github.io/scrubctl/cli.html"><kbd>CLI REFERENCE</kbd></a> (now at [github.com/turbra/scrubctl](https://github.com/turbra/scrubctl))
 
 ### I need to deploy, upgrade, or rebuild the plugin
 
@@ -60,8 +60,8 @@ pages from drifting into operator instructions.
   <a href="{{ '/user-guide.html' | relative_url }}">User Guide</a> for install,
   export, ZIP contents, and Argo CD Application generation from the browser
 - Terminal and pipeline path:
-  <a href="{{ '/cli.html' | relative_url }}">CLI Reference</a> for `scrubctl`
-  install, subcommands, and pipe-based usage
+  <a href="https://turbra.github.io/scrubctl/cli.html">CLI Reference</a> for `scrubctl`
+  install, subcommands, and pipe-based usage (now at <a href="https://github.com/turbra/scrubctl">github.com/turbra/scrubctl</a>)
 - Operator deployment path:
   <a href="{{ '/getting-started.html' | relative_url }}">Getting Started</a>
   for install, re-apply behavior, local development, and image publication
@@ -87,7 +87,7 @@ pages from drifting into operator instructions.
 
 ### I want to export resources from the terminal or a CI pipeline
 
-- [CLI Reference]({{ '/cli.html' | relative_url }})
+- [CLI Reference](https://turbra.github.io/scrubctl/cli.html) (now at [github.com/turbra/scrubctl](https://github.com/turbra/scrubctl))
 
 ### I need to understand the browser-side execution model
 
