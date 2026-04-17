@@ -1,11 +1,26 @@
-# GitOps Export Plugin
+<h1 align="center">GitOps Export Plugin</h1>
 
-An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/web_console/dynamic-plugins#overview-of-dynamic-plugins_customizing-web-console) that helps teams move from cluster-first resource management to GitOps. It scans a namespace, classifies each resource, strips cluster-generated noise from live manifests, produces clean YAML previews, downloads the result as a ZIP archive, and generates Argo CD Application YAML for Git-based rollout.
+<p align="center">
+  <strong>Scan namespaces. Classify resources. Export clean GitOps manifests.</strong>
+</p>
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-2C7A7B?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
-![OpenShift Console Plugin](https://img.shields.io/badge/OpenShift-console%20plugin-EE0000?style=flat-square)
+<p align="center">
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache--2.0-2C7A7B?style=flat-square" alt="License: Apache-2.0"></a>
+  <img src="https://img.shields.io/badge/OpenShift-console%20plugin-EE0000?style=flat-square" alt="OpenShift Console Plugin">
+</p>
 
-This repository contains the **OpenShift console plugin**. It runs entirely in your browser — install it once per cluster and every user who can access the console can use it with no extra tooling.
+<p align="center">
+  <a href="https://github.com/turbra/scrubctl">scrubctl</a> •
+  <a href="#screenshots">Demo</a> •
+  <a href="#install">Install</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#documentation">Documentation</a> •
+  <a href="#scrubctl-cli">Related</a>
+</p>
+
+---
+
+An OpenShift console [plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/web_console/dynamic-plugins#overview-of-dynamic-plugins_customizing-web-console) that helps teams move from cluster-first resource management to GitOps. It runs entirely in your browser — install it once per cluster and every user who can access the console can use it with no extra tooling.
 
 ## What The Console Plugin Does
 
