@@ -1,6 +1,6 @@
 ---
 title: Examples
-description: Practical GitOps Export install, scan, export, and development examples.
+description: Practical GitOps Export install, scan, export, RBAC, and Argo CD examples.
 ---
 
 import Tabs from '@theme/Tabs';
@@ -21,7 +21,31 @@ oc wait --for=condition=complete job/gitops-export-console-install-patcher \
 
 Then refresh the console and open the **GitOps Export** tab from a Project or Namespace details page.
 
-## Re-apply After a New Image
+## Export Workflow
+
+```text
+Project or Namespace page
+  -> GitOps Export tab
+  -> Secret handling: redact
+  -> Resource kinds: defaults
+  -> Export
+  -> review include / cleanup / review / exclude classifications
+  -> Download ZIP
+```
+
+Expected archive shape:
+
+```text
+gitops-export-my-app-20260506T140000Z.zip
+├── README.md
+├── WARNINGS.md
+└── manifests/
+    ├── include/
+    ├── cleanup/
+    └── review/
+```
+
+## Re-apply the Install Overlay
 
 ```sh
 oc delete job/gitops-export-console-install-patcher -n gitops-export-console
@@ -29,7 +53,7 @@ oc apply -k manifests/overlays/install
 oc -n gitops-export-console rollout status deployment/gitops-export-console
 ```
 
-Use this when a recently completed patcher Job still exists.
+Use this when a recently completed patcher Job still exists and blocks a rapid re-apply.
 
 ## Check Scan Permissions
 
@@ -56,34 +80,6 @@ oc auth can-i list serviceaccounts -n my-app
   </TabItem>
 </Tabs>
 
-## Build and Publish a Test Image
-
-```sh
-VERSION="$(./hack/version.sh)"
-IMAGE_TAG="$(./hack/image-tag.sh)"
-
-podman build --build-arg GITOPS_EXPORT_VERSION="${VERSION}" \
-  -t docker.io/example/gitops-export-console:"${IMAGE_TAG}" .
-
-podman push docker.io/example/gitops-export-console:"${IMAGE_TAG}"
-```
-
-Update `manifests/base/kustomization.yaml`:
-
-```yaml
-images:
-  - name: gitops-export-console-image
-    newName: docker.io/example/gitops-export-console
-    newTag: "<IMAGE_TAG>"
-```
-
-Then deploy the new image:
-
-```sh
-oc delete job/gitops-export-console-install-patcher -n gitops-export-console
-oc apply -k manifests/overlays/install
-```
-
 ## Connect Exported Manifests to Argo CD
 
 For a private repository, create a repository secret:
@@ -107,20 +103,22 @@ After committing the exported manifests and generated Application YAML, apply th
 oc apply -f my-app-application.yaml
 ```
 
-## Run Local Development Checks
+Example generated Application shape:
 
-```sh
-npm install
-npm run lint:check
-npm run check-types
-npm run test:fixtures
-npm run build
-```
-
-For docs-only changes:
-
-```sh
-cd website
-npm ci
-npm run build
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-app
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/example/my-app.git
+    targetRevision: main
+    path: manifests/overlays/install
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: my-app
+  syncPolicy: {}
 ```

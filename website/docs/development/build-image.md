@@ -1,6 +1,6 @@
 ---
 title: Build an Image
-description: Build and publish a custom GitOps Export plugin image.
+description: Build and publish a custom GitOps Export plugin image for development or release testing.
 ---
 
 # Build an Image

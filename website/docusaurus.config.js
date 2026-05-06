@@ -83,10 +83,12 @@ const config = {
           items: [
             {label: 'Overview', to: '/'},
             {label: 'Installation', to: '/getting-started/installation/'},
-            {label: 'First Export', to: '/getting-started/first-export/'},
+            {label: 'First Scan', to: '/getting-started/first-scan/'},
+            {label: 'Export ZIP', to: '/getting-started/export-zip/'},
             {label: 'Concepts', to: '/concepts/overview/'},
             {label: 'Reference', to: '/reference/'},
             {label: 'Examples', to: '/examples/'},
+            {label: 'Development', to: '/development/local-plugin-development/'},
           ],
         },
         {

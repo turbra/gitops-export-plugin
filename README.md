@@ -28,10 +28,12 @@ This repository contains the **OpenShift console plugin**. It runs entirely in y
 |----------|----------|-------------|
 | [Docs Home](https://turbra.github.io/gitops-export-plugin/) | All users | Docs-first site with the sidebar, page outline, screenshots, and task paths |
 | [Installation](https://turbra.github.io/gitops-export-plugin/getting-started/installation/) | Operators | Deploy, verify, re-apply, and remove the console plugin |
-| [First Export](https://turbra.github.io/gitops-export-plugin/getting-started/first-export/) | New users | Scan a namespace, review classifications, and download Git-ready manifests |
+| [First Scan](https://turbra.github.io/gitops-export-plugin/getting-started/first-scan/) | New users | Scan a namespace and review resource classifications |
+| [Export ZIP](https://turbra.github.io/gitops-export-plugin/getting-started/export-zip/) | New users | Download sanitized manifests as a GitOps-ready archive |
 | [Concepts](https://turbra.github.io/gitops-export-plugin/concepts/overview/) | Users and contributors | Runtime model, classification, sanitization, output, and security behavior |
-| [Reference](https://turbra.github.io/gitops-export-plugin/reference/) | Operators and contributors | Install resources, RBAC, local development, versioning, and testing |
-| [Examples](https://turbra.github.io/gitops-export-plugin/examples/) | Operators and contributors | Copy-paste install, RBAC, image build, Argo CD, and validation examples |
+| [Reference](https://turbra.github.io/gitops-export-plugin/reference/) | Operators | Install resources, RBAC, and versioning |
+| [Examples](https://turbra.github.io/gitops-export-plugin/examples/) | Operators and users | Copy-paste install, RBAC, export, and Argo CD examples |
+| [Development](https://turbra.github.io/gitops-export-plugin/development/local-plugin-development/) | Contributors | Local plugin development, image builds, and fixture testing |
 
 The Docusaurus source lives in [`website/`](./website/). Build it locally with:
 

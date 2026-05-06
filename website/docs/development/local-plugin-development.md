@@ -1,9 +1,9 @@
 ---
-title: Local Development
+title: Local Plugin Development
 description: Run the console plugin locally against an OpenShift cluster.
 ---
 
-# Local Development
+# Local Plugin Development
 
 Use the standard OpenShift dynamic-plugin split-terminal workflow.
 

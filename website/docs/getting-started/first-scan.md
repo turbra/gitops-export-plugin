@@ -1,13 +1,13 @@
 ---
-title: First Export
-description: Run the first namespace scan and download Git-ready manifests.
+title: First Scan
+description: Run a namespace scan and review resource classifications.
 ---
 
-# First Export
+# First Scan
 
-Use the first export workflow to confirm the plugin is installed and to produce a ZIP archive from a namespace.
+Use the first scan workflow to confirm the plugin is installed and to understand what GitOps Export sees in a namespace.
 
-## Run a Scan
+## Run the Scan
 
 1. Open a **Project** or **Namespace** in the OpenShift console.
 2. Select the **GitOps Export** tab.
@@ -23,7 +23,7 @@ Secret handling modes:
 | `omit` | Secrets are excluded from the scan result and listed as skipped in `WARNINGS.md`. |
 | `include` | Secret values are shown as-is in the browser. Use only when that output is safe to handle. |
 
-## Read the Result
+## Read the Classification Table
 
 The scan classifies each resource:
 
@@ -36,22 +36,6 @@ The scan classifies each resource:
 
 Click **Show YAML** on any non-excluded resource to inspect the sanitized manifest before downloading the archive.
 
-## Download the ZIP
-
-Click **Download ZIP** after a scan completes.
-
-```text
-gitops-export-<namespace>-<timestamp>.zip
-├── README.md
-├── WARNINGS.md
-└── manifests/
-    ├── include/
-    ├── cleanup/
-    └── review/
-```
-
-`WARNINGS.md` is present when the export contains cleanup, review, or skipped resources. Commit only the manifests you have reviewed.
-
 ## Check Missing Resources
 
 The plugin respects the current user's OpenShift RBAC. If a scan is missing expected resources, check whether the user can list that resource in the target namespace.
@@ -61,3 +45,5 @@ oc auth can-i list deployments -n my-app
 oc auth can-i list secrets -n my-app
 oc auth can-i list routes.route.openshift.io -n my-app
 ```
+
+Kinds that return `401`, `403`, `404`, or `405` are skipped. Other API errors are surfaced in the scan result.

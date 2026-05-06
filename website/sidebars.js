@@ -9,9 +9,9 @@ const sidebars = {
       collapsed: false,
       items: [
         'getting-started/installation',
-        'getting-started/first-export',
+        'getting-started/first-scan',
+        'getting-started/export-zip',
         'getting-started/argocd-application',
-        'getting-started/build-image',
       ],
     },
     {
@@ -20,9 +20,10 @@ const sidebars = {
       collapsed: false,
       items: [
         'concepts/overview',
+        'concepts/modes',
         'concepts/classification',
         'concepts/sanitization',
-        'concepts/output',
+        'concepts/gitops-output',
         'concepts/security',
       ],
     },
@@ -34,7 +35,6 @@ const sidebars = {
         'reference/index',
         'reference/install-manifests',
         'reference/rbac',
-        'reference/local-development',
         'reference/versioning',
       ],
     },
@@ -46,9 +46,19 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: 'Development',
+      collapsed: false,
+      items: [
+        'development/local-plugin-development',
+        'development/build-image',
+        'development/testing',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Project',
       collapsed: false,
-      items: ['project/architecture', 'project/testing', 'project/related'],
+      items: ['project/architecture', 'project/related'],
     },
   ],
 };
