@@ -3,7 +3,7 @@
 const config = {
   title: 'GitOps Export',
   tagline: 'OpenShift console plugin for GitOps-ready namespace exports',
-  favicon: 'img/gitops-export-favicon.svg',
+  favicon: 'img/logo.svg',
 
   url: 'https://turbra.github.io',
   baseUrl: '/gitops-export-plugin/',
@@ -44,12 +44,12 @@ const config = {
   ],
 
   themeConfig: {
-    image: 'img/gitops-export-favicon.svg',
+    image: 'img/logo.svg',
     navbar: {
       title: 'GitOps Export',
       logo: {
         alt: 'GitOps Export',
-        src: 'img/gitops-export-favicon.svg',
+        src: 'img/logo.svg',
       },
       items: [
         {to: '/', position: 'left', label: 'Docs'},
