@@ -13,3 +13,5 @@ bin/
 node_modules/
 dist/
 npm-debug.log
+website/.docusaurus/
+website/build/

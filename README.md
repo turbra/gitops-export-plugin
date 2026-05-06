@@ -26,11 +26,20 @@ This repository contains the **OpenShift console plugin**. It runs entirely in y
 
 | Document | Audience | Description |
 |----------|----------|-------------|
-| [User Guide](./docs/user-guide.md) | New users | Install, use, and understand GitOps Export in one page |
-| [Getting Started](./docs/getting-started.md) | Operators and contributors | Full deployment reference, local development, and image builds |
-| [Architecture](./docs/architecture-and-deployment.md) | Operators and contributors | Runtime components, namespace model, scan flow, and security model |
-| [Manifest Parsing and Pruning](./docs/manifest-parsing-and-pruning.md) | Contributors and advanced users | How the plugin classifies resources, sanitizes metadata, and builds YAML previews from live objects |
-| [RBAC Reference](./docs/rbac-reference.md) | Operators and security teams | Permissions required to install, run, and use the plugin |
+| [Docs Home](https://turbra.github.io/gitops-export-plugin/) | All users | Docs-first site with the sidebar, page outline, screenshots, and task paths |
+| [Installation](https://turbra.github.io/gitops-export-plugin/getting-started/installation/) | Operators | Deploy, verify, re-apply, and remove the console plugin |
+| [First Export](https://turbra.github.io/gitops-export-plugin/getting-started/first-export/) | New users | Scan a namespace, review classifications, and download Git-ready manifests |
+| [Concepts](https://turbra.github.io/gitops-export-plugin/concepts/overview/) | Users and contributors | Runtime model, classification, sanitization, output, and security behavior |
+| [Reference](https://turbra.github.io/gitops-export-plugin/reference/) | Operators and contributors | Install resources, RBAC, local development, versioning, and testing |
+| [Examples](https://turbra.github.io/gitops-export-plugin/examples/) | Operators and contributors | Copy-paste install, RBAC, image build, Argo CD, and validation examples |
+
+The Docusaurus source lives in [`website/`](./website/). Build it locally with:
+
+```sh
+cd website
+npm ci
+npm run build
+```
 
 ## Quick Start
 
@@ -59,11 +68,11 @@ This creates the `gitops-export-console` namespace, deploys the plugin, and runs
 ### Screenshots
 
 <p>
-  <a href="./docs/gitops-export-result.png">
-    <img src="./docs/gitops-export-result.png" alt="GitOps Export scan results" width="48%" />
+  <a href="./website/docs/assets/gitops-export-result.png">
+    <img src="./website/docs/assets/gitops-export-result.png" alt="GitOps Export scan results" width="48%" />
   </a>
-  <a href="./docs/gitops-export-argocd.png">
-    <img src="./docs/gitops-export-argocd.png" alt="GitOps Export Argo CD application generator" width="48%" />
+  <a href="./website/docs/assets/gitops-export-argocd.png">
+    <img src="./website/docs/assets/gitops-export-argocd.png" alt="GitOps Export Argo CD application generator" width="48%" />
   </a>
 </p>
 

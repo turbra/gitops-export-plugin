@@ -1,0 +1,126 @@
+---
+title: Examples
+description: Practical GitOps Export install, scan, export, and development examples.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Examples
+
+These examples use realistic placeholders and avoid cluster-specific values.
+
+## Install and Verify
+
+```sh
+oc apply -k manifests/overlays/install
+oc -n gitops-export-console rollout status deployment/gitops-export-console
+oc wait --for=condition=complete job/gitops-export-console-install-patcher \
+  -n gitops-export-console --timeout=120s
+```
+
+Then refresh the console and open the **GitOps Export** tab from a Project or Namespace details page.
+
+## Re-apply After a New Image
+
+```sh
+oc delete job/gitops-export-console-install-patcher -n gitops-export-console
+oc apply -k manifests/overlays/install
+oc -n gitops-export-console rollout status deployment/gitops-export-console
+```
+
+Use this when a recently completed patcher Job still exists.
+
+## Check Scan Permissions
+
+<Tabs>
+  <TabItem value="common" label="Common resources" default>
+
+```sh
+oc auth can-i list deployments -n my-app
+oc auth can-i list services -n my-app
+oc auth can-i list configmaps -n my-app
+oc auth can-i list routes.route.openshift.io -n my-app
+```
+
+  </TabItem>
+  <TabItem value="sensitive" label="Sensitive / opt-in">
+
+```sh
+oc auth can-i list secrets -n my-app
+oc auth can-i list roles.rbac.authorization.k8s.io -n my-app
+oc auth can-i list rolebindings.rbac.authorization.k8s.io -n my-app
+oc auth can-i list serviceaccounts -n my-app
+```
+
+  </TabItem>
+</Tabs>
+
+## Build and Publish a Test Image
+
+```sh
+VERSION="$(./hack/version.sh)"
+IMAGE_TAG="$(./hack/image-tag.sh)"
+
+podman build --build-arg GITOPS_EXPORT_VERSION="${VERSION}" \
+  -t docker.io/example/gitops-export-console:"${IMAGE_TAG}" .
+
+podman push docker.io/example/gitops-export-console:"${IMAGE_TAG}"
+```
+
+Update `manifests/base/kustomization.yaml`:
+
+```yaml
+images:
+  - name: gitops-export-console-image
+    newName: docker.io/example/gitops-export-console
+    newTag: "<IMAGE_TAG>"
+```
+
+Then deploy the new image:
+
+```sh
+oc delete job/gitops-export-console-install-patcher -n gitops-export-console
+oc apply -k manifests/overlays/install
+```
+
+## Connect Exported Manifests to Argo CD
+
+For a private repository, create a repository secret:
+
+```sh
+oc create secret generic repo-my-app \
+  --from-literal=type=git \
+  --from-literal=url=https://github.com/example/my-app.git \
+  --from-literal=username=<token-username> \
+  --from-literal=password=<token> \
+  -n openshift-gitops
+
+oc label secret repo-my-app \
+  argocd.argoproj.io/secret-type=repository \
+  -n openshift-gitops
+```
+
+After committing the exported manifests and generated Application YAML, apply the Application if your environment allows direct apply:
+
+```sh
+oc apply -f my-app-application.yaml
+```
+
+## Run Local Development Checks
+
+```sh
+npm install
+npm run lint:check
+npm run check-types
+npm run test:fixtures
+npm run build
+```
+
+For docs-only changes:
+
+```sh
+cd website
+npm ci
+npm run build
+```

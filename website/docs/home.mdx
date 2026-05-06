@@ -1,0 +1,105 @@
+---
+id: home
+slug: /
+title: GitOps Export
+description: OpenShift console plugin for exporting sanitized namespace manifests and generating GitOps-ready Argo CD Application YAML.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Link from '@docusaurus/Link';
+import resultShot from './assets/gitops-export-result.png';
+import argocdShot from './assets/gitops-export-argocd.png';
+
+<div className="gxp-hero">
+  <p className="gxp-eyebrow">OpenShift console plugin</p>
+  <p className="gxp-hero__lead">Scan a namespace from the OpenShift console, classify each resource, remove cluster-generated noise, download Git-ready YAML, and generate Argo CD Application manifests from the same browser workflow.</p>
+  <div className="gxp-badges">
+    <a href="https://www.apache.org/licenses/LICENSE-2.0"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/License-Apache--2.0-2C7A7B?style=flat-square" /></a>
+    <img alt="OpenShift Console Plugin" src="https://img.shields.io/badge/OpenShift-console%20plugin-EE0000?style=flat-square" />
+  </div>
+</div>
+
+## Quick Start
+
+<Tabs>
+  <TabItem value="install" label="Install" default>
+
+```sh
+oc apply -k manifests/overlays/install
+oc -n gitops-export-console rollout status deployment/gitops-export-console
+oc wait --for=condition=complete job/gitops-export-console-install-patcher \
+  -n gitops-export-console --timeout=120s
+```
+
+Refresh the OpenShift console and open the **GitOps Export** tab on a Project or Namespace details page.
+
+  </TabItem>
+  <TabItem value="export" label="Export">
+
+```text
+Project or Namespace page
+  -> GitOps Export tab
+  -> choose Secret handling and resource kinds
+  -> Export
+  -> Download ZIP
+```
+
+The ZIP contains `README.md`, optional `WARNINGS.md`, and manifests grouped under `manifests/include/`, `manifests/cleanup/`, and `manifests/review/`.
+
+  </TabItem>
+  <TabItem value="argocd" label="Argo CD">
+
+```text
+Latest scan result
+  -> GitOps definition
+  -> set repository URL, revision, path, and Application name
+  -> copy the generated Application YAML
+```
+
+The form pre-populates in-cluster destination server, scanned namespace, `openshift-gitops`, `default`, and manual sync mode.
+
+  </TabItem>
+</Tabs>
+
+## What It Does
+
+<div className="gxp-link-grid">
+  <Link className="gxp-link-card" to="/getting-started/first-export/">
+    <strong>Run a first export</strong>
+    <span>Install the plugin, scan a namespace, review classifications, and download manifests.</span>
+  </Link>
+  <Link className="gxp-link-card" to="/concepts/classification/">
+    <strong>Understand classifications</strong>
+    <span>See why resources land in include, cleanup, review, or exclude.</span>
+  </Link>
+  <Link className="gxp-link-card" to="/reference/rbac/">
+    <strong>Check RBAC</strong>
+    <span>Map installer, runtime, and end-user permissions to exact OpenShift resources.</span>
+  </Link>
+</div>
+
+## Screenshots
+
+<div className="gxp-screenshot-grid">
+  <a className="gxp-shot" href={resultShot}>
+    <img src={resultShot} alt="GitOps Export scan result view" />
+    <span>Scan summary, classification labels, and YAML previews inside the OpenShift console.</span>
+  </a>
+  <a className="gxp-shot" href={argocdShot}>
+    <img src={argocdShot} alt="GitOps Export Argo CD application form" />
+    <span>Argo CD Application generator with local defaults and generated YAML review.</span>
+  </a>
+</div>
+
+## Operating Model
+
+| Area | Current model |
+| --- | --- |
+| Scope | Single namespace, browser-side scan |
+| Output | Sanitized YAML previews, ZIP archive, Argo CD `Application` YAML |
+| Auth model | OpenShift console session and namespace RBAC |
+| Runtime | Static plugin served by nginx, no backend API |
+| Install path | Kustomize overlay plus one-time console patcher Job |
+
+GitOps Export is intentionally narrow. It does not push to Git, install Argo CD, or modify target namespace resources. It helps users convert live namespace state into reviewable GitOps artifacts.

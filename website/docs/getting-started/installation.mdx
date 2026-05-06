@@ -1,0 +1,71 @@
+---
+title: Installation
+description: Deploy the GitOps Export console plugin to an OpenShift cluster.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation
+
+Install GitOps Export once per OpenShift cluster. The plugin then appears on Project and Namespace details pages for users whose RBAC allows them to view those pages.
+
+## Prerequisites
+
+| Requirement | Notes |
+| --- | --- |
+| OpenShift | OpenShift 4.20 or later. This branch targets the PatternFly 6 and dynamic-plugin-sdk 4.21 console API. |
+| `oc` CLI | Authenticated to the target cluster. |
+| Installer permissions | `cluster-admin`, or equivalent permissions to create the install overlay resources. |
+
+For OpenShift 4.18, use the `feature/ocp-4.18-compat` branch, which pins PatternFly 5 and SDK 4.18.
+
+## Install the Plugin
+
+<Tabs>
+  <TabItem value="apply" label="Apply overlay" default>
+
+```sh
+oc apply -k manifests/overlays/install
+```
+
+  </TabItem>
+  <TabItem value="verify" label="Verify rollout">
+
+```sh
+oc -n gitops-export-console rollout status deployment/gitops-export-console
+
+oc wait --for=condition=complete job/gitops-export-console-install-patcher \
+  -n gitops-export-console --timeout=120s
+```
+
+  </TabItem>
+  <TabItem value="remove" label="Remove">
+
+```sh
+oc delete -k manifests/overlays/install
+```
+
+Refresh the OpenShift console after removal. The **GitOps Export** tab will no longer appear.
+
+  </TabItem>
+</Tabs>
+
+The install overlay creates a `gitops-export-console` namespace, deploys the static plugin server, registers a `ConsolePlugin`, and runs a one-time patcher Job that enables the plugin in the console operator.
+
+## Handle Rapid Re-apply
+
+The patcher Job has a fixed name and `ttlSecondsAfterFinished: 300`. If you re-run the install overlay within 300 seconds of a previous install or image refresh, delete the previous completed Job first.
+
+```sh
+oc delete job/gitops-export-console-install-patcher -n gitops-export-console
+oc apply -k manifests/overlays/install
+```
+
+## Open the Plugin
+
+1. Refresh the OpenShift console.
+2. Open a **Project** or **Namespace** details page.
+3. Select the **GitOps Export** tab.
+
+If the tab does not appear, confirm the deployment is ready, the patcher Job completed, and the `gitops-export-console` plugin is enabled in `consoles.operator.openshift.io/cluster`.
